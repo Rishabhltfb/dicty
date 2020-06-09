@@ -1,4 +1,5 @@
 import 'package:dictyapp/helpers/dimensions.dart';
+import 'package:dictyapp/screens/word_screen.dart';
 import 'package:dictyapp/widgets/dictyHead.dart';
 import 'package:flutter/material.dart';
 
@@ -184,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         width: title != 'Speak Instead'
             ? viewportWidth * 0.6
-            : viewportWidth * 0.35,
+            : viewportWidth * 0.36,
         child: RaisedButton(
             color: Colors.white,
             shape: RoundedRectangleBorder(
@@ -198,7 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Theme.of(context).primaryColor,
                     fontSize: title != 'Speak Instead'
                         ? viewportHeight * 0.03
-                        : viewportHeight * 0.018,
+                        : viewportHeight * 0.015,
                     fontFamily: 'Krungthep'),
               ),
             ),
@@ -209,8 +210,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   showMyWords = true;
                   // myWordsList(context);
                 });
-              } else {
-                print(title);
+              } else if (title == 'Practice') {
+                Navigator.of(context).pushNamed('/practice');
               }
             }),
       ),
@@ -267,7 +268,8 @@ class _HomeScreenState extends State<HomeScreen> {
     var list = [];
     dict_words.forEach((word) {
       if (word.length >= searchWord.length) {
-        if (word.toLowerCase().substring(0, searchWord.length) == searchWord) {
+        if (word.toLowerCase().substring(0, searchWord.length) ==
+            searchWord.toLowerCase()) {
           list.add(word);
         }
       }
@@ -280,15 +282,25 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView.builder(
         itemCount: list.length,
         itemBuilder: (context, index) {
-          return Center(
-              child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              list[index],
-              style: TextStyle(
-                  fontFamily: 'Krungthep', fontSize: viewportHeight * 0.03),
-            ),
-          ));
+          return GestureDetector(
+            onTap: () {
+              FocusScope.of(context).requestFocus(FocusNode());
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => WordScreen(list[index]),
+                ),
+              );
+            },
+            child: Center(
+                child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                list[index],
+                style: TextStyle(
+                    fontFamily: 'Krungthep', fontSize: viewportHeight * 0.03),
+              ),
+            )),
+          );
         },
       ),
     );

@@ -13,11 +13,13 @@ class DictyLabel extends StatelessWidget {
           child: Text(
             'Dicty',
             style: TextStyle(
-                color: Colors.white, fontSize: 60, fontFamily: 'Krungthep'),
+                color: Colors.white,
+                fontSize: viewportHeight * 0.09,
+                fontFamily: 'Krungthep'),
           ),
         ),
         Positioned(
-          top: 68,
+          top: viewportHeight * 0.1,
           left: viewportWidth / 2 - 78,
           child: Text(
             subHead,

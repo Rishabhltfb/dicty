@@ -3,6 +3,7 @@ import 'package:dictyapp/screens/auth_screen.dart';
 import 'package:dictyapp/screens/home_screen.dart';
 import 'package:dictyapp/screens/langSelect_screen.dart';
 import 'package:dictyapp/screens/learnLang_screen.dart';
+import 'package:dictyapp/screens/practice_screen.dart';
 import 'package:dictyapp/screens/setting_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -50,6 +51,7 @@ class _MyAppState extends State<MyApp> {
           '/learnLang': (BuildContext context) => LearnLangScreen(),
           '/home': (BuildContext context) => HomeScreen(),
           '/settings': (BuildContext context) => SettingScreen(),
+          '/practice': (BuildContext context) => PracticeScreen(),
         },
       ),
     );
