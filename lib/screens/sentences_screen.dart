@@ -1,21 +1,28 @@
 import 'package:dictyapp/helpers/dimensions.dart';
-import 'package:dictyapp/screens/sentences_screen.dart';
 import 'package:dictyapp/widgets/wordHead.dart';
 import 'package:flutter/material.dart';
 
-class WordScreen extends StatefulWidget {
+class SentencesScreen extends StatefulWidget {
   final word;
-  WordScreen(this.word);
+  SentencesScreen(this.word);
   @override
-  _WordScreenState createState() => _WordScreenState();
+  _SentencesScreenState createState() => _SentencesScreenState();
 }
 
-class _WordScreenState extends State<WordScreen> {
+class _SentencesScreenState extends State<SentencesScreen> {
   var viewportHeight;
   var viewportWidth;
-  bool showalldefinitions = false;
-  List<String> definitions = [
+  bool showDefinitions = false;
+  bool showAllDefinitions = false;
+  List<String> definitionsList = [
     'a male who has the same parents as another or one parent in common with another. (noun)'
+  ];
+  List<String> sentences = [
+    'a male who has the same parents as another or one parent in common with another. (noun)',
+    'a male who has the same parents as another or one parent in common with another. (noun)',
+    'a male who has the same parents as another or one parent in common with another. (noun)',
+    'a male who has the same parents as another or one parent in common with another. (noun)',
+    'a male who has the same parents as another or one parent in common with another. (noun)',
   ];
   @override
   Widget build(BuildContext context) {
@@ -31,21 +38,17 @@ class _WordScreenState extends State<WordScreen> {
             navbarButton(),
             WordHead(viewportHeight, viewportWidth, widget.word),
             Container(),
-            _definitions(),
-            showalldefinitions
-                ? _moreButton('Less Difinitions')
-                : _moreButton('More Difinitions'),
+            showDefinitions ? _definitions('Definitions') : Container(),
+            _definitionButton('See Definitions'),
             _button('Sentences'),
-            _button('Movie Texts'),
-            _button('In Videos'),
-            _button('+ Add to List'),
+            _definitions('Sentences'),
           ],
         ),
       ),
     );
   }
 
-  Widget _moreButton(String title) {
+  Widget _definitionButton(String title) {
     return Container(
       width: viewportWidth * 0.4,
       height: viewportHeight * 0.045,
@@ -63,24 +66,9 @@ class _WordScreenState extends State<WordScreen> {
         padding: EdgeInsets.all(0),
         splashColor: Colors.white,
         onPressed: () {
-          if (title == 'More Difinitions') {
-            setState(() {
-              showalldefinitions = true;
-              definitions.add(
-                  'a male who has the same parents as another or one parent in common with another. (noun)');
-              definitions.add(
-                  'a male who has the same parents as another or one parent in common with another. (noun)');
-              definitions.add(
-                  'a male who has the same parents as another or one parent in common with another. (noun)');
-            });
-          } else {
-            setState(() {
-              showalldefinitions = false;
-              var definition1 = definitions[1];
-              definitions = [];
-              definitions.add(definition1);
-            });
-          }
+          setState(() {
+            showDefinitions = true;
+          });
         },
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(23)),
         highlightElevation: 0,
@@ -117,13 +105,7 @@ class _WordScreenState extends State<WordScreen> {
               ),
             ),
             onPressed: () {
-              if (title == 'Sentences') {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => SentencesScreen(widget.word),
-                  ),
-                );
-              }
+              Navigator.of(context).pop();
             }),
       ),
     );
@@ -148,10 +130,18 @@ class _WordScreenState extends State<WordScreen> {
     );
   }
 
-  Widget _definitions() {
+  Widget _definitions(String title) {
+    var definitions;
+    if (title == 'Sentences') {
+      definitions = sentences;
+    } else {
+      definitions = definitionsList;
+    }
     return Container(
       width: viewportWidth * 0.8,
-      height: showalldefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25,
+      height: title == 'Sentences'
+          ? viewportHeight * 0.65
+          : (showAllDefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25),
       child: ListView.builder(
         itemCount: definitions.length,
         itemBuilder: (context, index) {

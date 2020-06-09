@@ -96,7 +96,7 @@ class _LangSelectScreenState extends State<LangSelectScreen> {
                 width: viewportWidth * 0.5,
                 child: _dropdown(),
               ),
-              SizedBox(height: viewportHeight * 0.2),
+              SizedBox(height: viewportHeight * 0.35),
               Container(
                 width: viewportWidth * 0.5,
                 child: _continueButton(),

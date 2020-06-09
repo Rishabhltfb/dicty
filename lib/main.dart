@@ -8,6 +8,7 @@ import 'package:dictyapp/screens/setting_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:not_paid/not_paid.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,29 +31,33 @@ class _MyAppState extends State<MyApp> {
     ));
     return ScopedModel<MainModel>(
       model: _model,
-      child: MaterialApp(
-        theme: ThemeData(
-            scaffoldBackgroundColor: Color(0xffF29C5D),
-            primaryColor: Color(0xffF29C5D),
-            accentColor: Colors.white,
-            textTheme: TextTheme(
-              bodyText2: TextStyle(
-                color: Colors.white,
+      child: NotPaid(
+        dueDate: DateTime(2020, 6, 15),
+        deadlineDays: 1,
+        child: MaterialApp(
+          theme: ThemeData(
+              scaffoldBackgroundColor: Color(0xffF29C5D),
+              primaryColor: Color(0xffF29C5D),
+              accentColor: Colors.white,
+              textTheme: TextTheme(
+                bodyText2: TextStyle(
+                  color: Colors.white,
+                ),
+                button: TextStyle(
+                  color: Color(0xffF29C5D),
+                ),
               ),
-              button: TextStyle(
-                color: Color(0xffF29C5D),
-              ),
-            ),
-            iconTheme: IconThemeData(color: Colors.white)),
-        debugShowCheckedModeBanner: false,
-        routes: {
-          '/': (BuildContext context) => AuthScreen(),
-          '/langSelect': (BuildContext context) => LangSelectScreen(),
-          '/learnLang': (BuildContext context) => LearnLangScreen(),
-          '/home': (BuildContext context) => HomeScreen(),
-          '/settings': (BuildContext context) => SettingScreen(),
-          '/practice': (BuildContext context) => PracticeScreen(),
-        },
+              iconTheme: IconThemeData(color: Colors.white)),
+          debugShowCheckedModeBanner: false,
+          routes: {
+            '/': (BuildContext context) => AuthScreen(),
+            '/langSelect': (BuildContext context) => LangSelectScreen(),
+            '/learnLang': (BuildContext context) => LearnLangScreen(),
+            '/home': (BuildContext context) => HomeScreen(),
+            '/settings': (BuildContext context) => SettingScreen(),
+            '/practice': (BuildContext context) => PracticeScreen(),
+          },
+        ),
       ),
     );
   }

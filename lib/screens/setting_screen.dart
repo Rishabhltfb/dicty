@@ -29,7 +29,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 title,
                 style: TextStyle(
                     color: Theme.of(context).primaryColor,
-                    fontSize: viewportHeight * 0.03,
+                    fontSize: viewportHeight * 0.028,
                     fontFamily: 'Krungthep'),
               ),
             ),
