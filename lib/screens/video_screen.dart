@@ -1,21 +1,20 @@
 import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
-import 'package:dictyapp/screens/sentences_screen.dart';
-import 'package:dictyapp/screens/video_screen.dart';
 import 'package:dictyapp/widgets/wordHead.dart';
 import 'package:flutter/material.dart';
 
-class WordScreen extends StatefulWidget {
+class VideoScreen extends StatefulWidget {
   final word;
-  WordScreen(this.word);
+  VideoScreen(this.word);
   @override
-  _WordScreenState createState() => _WordScreenState();
+  _VideoScreenState createState() => _VideoScreenState();
 }
 
-class _WordScreenState extends State<WordScreen> {
+class _VideoScreenState extends State<VideoScreen> {
   var viewportHeight;
   var viewportWidth;
-  bool showalldefinitions = false;
+  bool showDefinitions = false;
+  bool showAllDefinitions = false;
   List<String> definitions = [
     'a male who has the same parents as another or one parent in common with another. (noun)'
   ];
@@ -33,22 +32,34 @@ class _WordScreenState extends State<WordScreen> {
             navbarButton(),
             WordHead(viewportHeight, viewportWidth, widget.word),
             Container(),
-            _definitions(),
+            showDefinitions ? _definitions() : Container(),
             SizedBox(height: 15),
-            showalldefinitions
-                ? _moreButton('Less Difinitions')
-                : _moreButton('More Difinitions'),
-            _button('Sentences'),
-            _button('Movie Texts'),
+            showAllDefinitions
+                ? Container()
+                : showDefinitions
+                    ? _definitionButton('More Definitions')
+                    : _definitionButton('See Definitions'),
+            SizedBox(height: 15),
+            showDefinitions
+                ? _definitionButton('Close Definitions')
+                : Container(),
             _button('In Videos'),
-            _button('+ Add to List'),
+            SizedBox(height: viewportHeight * 0.05),
+            Container(
+              height: viewportHeight * 0.3,
+              width: viewportWidth,
+              child: Image.asset(
+                'assets/images/youtube.png',
+                fit: BoxFit.cover,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _moreButton(String title) {
+  Widget _definitionButton(String title) {
     return Container(
       width: viewportWidth * 0.4,
       height: viewportHeight * 0.045,
@@ -66,24 +77,27 @@ class _WordScreenState extends State<WordScreen> {
         padding: EdgeInsets.all(0),
         splashColor: Colors.white,
         onPressed: () {
-          if (title == 'More Difinitions') {
-            setState(() {
-              showalldefinitions = true;
+          setState(() {
+            if (title == 'See Definitions') {
+              showDefinitions = true;
+            } else if (title == 'Close Definitions') {
+              showDefinitions = false;
+              showAllDefinitions = false;
+              var firstDefinition = definitions[0];
+              List<String> list = [];
+              list.add(firstDefinition);
+              definitions = list;
+            } else {
+              showAllDefinitions = true;
+
               definitions.add(
                   'a male who has the same parents as another or one parent in common with another. (noun)');
               definitions.add(
                   'a male who has the same parents as another or one parent in common with another. (noun)');
               definitions.add(
                   'a male who has the same parents as another or one parent in common with another. (noun)');
-            });
-          } else {
-            setState(() {
-              showalldefinitions = false;
-              var definition1 = definitions[1];
-              definitions = [];
-              definitions.add(definition1);
-            });
-          }
+            }
+          });
         },
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(23)),
         highlightElevation: 0,
@@ -120,19 +134,7 @@ class _WordScreenState extends State<WordScreen> {
               ),
             ),
             onPressed: () {
-              if (title == 'Sentences') {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => SentencesScreen(widget.word),
-                  ),
-                );
-              } else if (title == 'In Videos') {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => VideoScreen(widget.word),
-                  ),
-                );
-              }
+              Navigator.of(context).pop();
             }),
       ),
     );
@@ -160,12 +162,11 @@ class _WordScreenState extends State<WordScreen> {
   Widget _definitions() {
     return Container(
       width: viewportWidth * 0.8,
-      height: showalldefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25,
+      height: showAllDefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25,
       child: ListView.builder(
         itemCount: definitions.length,
         itemBuilder: (context, index) {
           return ListTile(
-            // leading: Text((index + 1).toString()),
             leading: Container(
               height: 22,
               width: 22,

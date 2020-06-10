@@ -58,7 +58,7 @@ class _LangSelectScreenState extends State<LangSelectScreen> {
               fontFamily: 'Krungthep'),
         ),
         onPressed: () {
-          Navigator.of(context).pushNamed('/learnLang');
+          Navigator.of(context).pushReplacementNamed('/learnLang');
         });
   }
 

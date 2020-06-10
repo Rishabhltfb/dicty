@@ -62,7 +62,9 @@ flutter:
     - family: Krungthep
       fonts:
         - asset: assets/fonts/Krungthep.ttf
-        # - asset: fonts/Schyler-Italic.ttf
+    - family: MyFlutterApp
+      fonts:
+        - asset: assets/icons/MyFlutterApp.ttf
         #   style: italic
   #   - family: Trajan Pro
   #     fonts:

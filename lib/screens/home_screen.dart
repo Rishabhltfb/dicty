@@ -1,4 +1,5 @@
 import 'package:dictyapp/helpers/dimensions.dart';
+import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
 import 'package:dictyapp/screens/word_screen.dart';
 import 'package:dictyapp/widgets/dictyHead.dart';
 import 'package:flutter/material.dart';
@@ -157,12 +158,17 @@ class _HomeScreenState extends State<HomeScreen> {
               width: viewportWidth * 0.15,
               child: Row(
                 children: <Widget>[
-                  Icon(
-                    Icons.language,
-                    color: Theme.of(context).primaryColor,
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: Icon(
+                      Icons.translate,
+                      size: viewportHeight * 0.025,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
                   Icon(
-                    Icons.audiotrack,
+                    MyFlutterApp.volume,
+                    size: viewportHeight * 0.025,
                     color: Theme.of(context).primaryColor,
                   ),
                 ],

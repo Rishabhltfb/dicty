@@ -63,7 +63,7 @@ class _AuthScreenState extends State<AuthScreen> {
           ],
         ),
         onPressed: () {
-          Navigator.of(context).pushNamed('/langSelect');
+          Navigator.of(context).pushReplacementNamed('/langSelect');
         });
   }
 

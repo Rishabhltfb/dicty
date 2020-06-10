@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dictyapp/helpers/dimensions.dart';
+import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
 import 'package:dictyapp/widgets/dictyHead.dart';
 import 'package:flutter/material.dart';
 
@@ -164,8 +165,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
               children: <Widget>[
                 IconButton(
                   icon: Icon(
-                    Icons.query_builder,
-                    size: viewportHeight * 0.048,
+                    MyFlutterApp.question,
+                    size: viewportHeight * 0.04,
                     color: Theme.of(context).primaryColor,
                   ),
                   onPressed: () {
@@ -217,8 +218,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
             Center(
               child: IconButton(
                 icon: Icon(
-                  Icons.mic,
-                  size: viewportHeight * 0.055,
+                  MyFlutterApp.volume,
+                  size: viewportHeight * 0.052,
                   color: Theme.of(context).primaryColor,
                 ),
                 onPressed: () {},

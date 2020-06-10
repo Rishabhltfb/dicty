@@ -1,4 +1,5 @@
 import 'package:dictyapp/helpers/dimensions.dart';
+import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
 import 'package:dictyapp/widgets/wordHead.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +40,16 @@ class _SentencesScreenState extends State<SentencesScreen> {
             WordHead(viewportHeight, viewportWidth, widget.word),
             Container(),
             showDefinitions ? _definitions('Definitions') : Container(),
-            _definitionButton('See Definitions'),
+            SizedBox(height: 15),
+            showAllDefinitions
+                ? Container()
+                : showDefinitions
+                    ? _definitionButton('More Definitions')
+                    : _definitionButton('See Definitions'),
+            SizedBox(height: 15),
+            showDefinitions
+                ? _definitionButton('Close Definitions')
+                : Container(),
             _button('Sentences'),
             _definitions('Sentences'),
           ],
@@ -67,7 +77,25 @@ class _SentencesScreenState extends State<SentencesScreen> {
         splashColor: Colors.white,
         onPressed: () {
           setState(() {
-            showDefinitions = true;
+            if (title == 'See Definitions') {
+              showDefinitions = true;
+            } else if (title == 'Close Definitions') {
+              showDefinitions = false;
+              showAllDefinitions = false;
+              var firstDefinition = definitionsList[0];
+              List<String> list = [];
+              list.add(firstDefinition);
+              definitionsList = list;
+            } else {
+              showAllDefinitions = true;
+
+              definitionsList.add(
+                  'a male who has the same parents as another or one parent in common with another. (noun)');
+              definitionsList.add(
+                  'a male who has the same parents as another or one parent in common with another. (noun)');
+              definitionsList.add(
+                  'a male who has the same parents as another or one parent in common with another. (noun)');
+            }
           });
         },
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(23)),
@@ -140,7 +168,7 @@ class _SentencesScreenState extends State<SentencesScreen> {
     return Container(
       width: viewportWidth * 0.8,
       height: title == 'Sentences'
-          ? viewportHeight * 0.65
+          ? viewportHeight * 0.6
           : (showAllDefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25),
       child: ListView.builder(
         itemCount: definitions.length,
@@ -193,7 +221,8 @@ class _SentencesScreenState extends State<SentencesScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8.0, vertical: 2),
                       child: Icon(
-                        Icons.access_alarm,
+                        Icons.translate,
+                        size: viewportHeight * 0.03,
                         color: Theme.of(context).primaryColor,
                       ),
                     ),
@@ -214,7 +243,8 @@ class _SentencesScreenState extends State<SentencesScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8.0, vertical: 2),
                       child: Icon(
-                        Icons.access_alarm,
+                        MyFlutterApp.volume,
+                        size: viewportHeight * 0.03,
                         color: Theme.of(context).primaryColor,
                       ),
                     ),
