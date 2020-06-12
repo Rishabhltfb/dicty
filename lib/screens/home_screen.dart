@@ -1,10 +1,14 @@
 import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
+import 'package:dictyapp/scoped_models/main_scoped_model.dart';
 import 'package:dictyapp/screens/word_screen.dart';
 import 'package:dictyapp/widgets/dictyHead.dart';
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class HomeScreen extends StatefulWidget {
+  final MainModel model;
+  HomeScreen(this.model);
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -18,20 +22,24 @@ class _HomeScreenState extends State<HomeScreen> {
   bool typing = false;
   bool showResults = false;
   List<String> dict_words = [
-    // 'Bra',
     'Brain',
     'Brother',
     'Breed',
     'Broke',
     'Break',
-    // 'Bra',
     'Brain',
     'Brother',
     'Breed',
     'Broke',
     'Break',
-    // 'Bra',
   ];
+  @override
+  void initState() {
+    widget.model.fetchWords().then((_) {
+      mywords = widget.model.myWords;
+    });
+    super.initState();
+  }
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   List<String> mywords = [
@@ -123,22 +131,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget myWordsList(context) {
+  Widget myWordsList(context, MainModel model) {
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
             color: Colors.white,
-            // spreadRadius: 1,
-            // blurRadius: 2,
-            // offset: Offset.fromDirection(0.7),
           ),
         ],
         borderRadius: BorderRadius.all(
           Radius.circular(20),
         ),
       ),
-      // color: Theme.of(context).accentColor,
       width: viewportWidth * 0.8,
       height: viewportHeight * 0.5,
       child: ListView.separated(
@@ -154,6 +158,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontFamily: 'Krungthep',
                   color: Theme.of(context).primaryColor),
             ),
+            onTap: () {
+              model.translateIBM(word);
+            },
             trailing: Container(
               width: viewportWidth * 0.15,
               child: Row(
@@ -214,7 +221,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 setState(() {
                   hideButtons = true;
                   showMyWords = true;
-                  // myWordsList(context);
                 });
               } else if (title == 'Practice') {
                 Navigator.of(context).pushNamed('/practice');
@@ -228,6 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     viewportHeight = getViewportHeight(context);
     viewportWidth = getViewportWidth(context);
+
     return SafeArea(
       child: Scaffold(
         body: GestureDetector(
@@ -241,29 +248,33 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             }
           },
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                navbarButton(),
-                DictyLabel(viewportHeight, viewportWidth, ''),
-                SizedBox(
-                  height: viewportHeight * 0.12,
+          child: ScopedModelDescendant<MainModel>(
+            builder: (context, child, model) {
+              return SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    navbarButton(),
+                    DictyLabel(viewportHeight, viewportWidth, ''),
+                    SizedBox(
+                      height: viewportHeight * 0.12,
+                    ),
+                    Container(
+                      height: viewportHeight * 0.05,
+                      width: viewportWidth * 0.6,
+                      child: searchWidget(),
+                    ),
+                    typing ? _button('Speak Instead') : Container(),
+                    showResults ? searchedWords() : Container(),
+                    SizedBox(
+                      height: viewportHeight * 0.05,
+                    ),
+                    showMyWords ? myWordsList(context, model) : Container(),
+                    hideButtons ? Container() : _button('My Words'),
+                    hideButtons ? Container() : _button('Practice'),
+                  ],
                 ),
-                Container(
-                  height: viewportHeight * 0.05,
-                  width: viewportWidth * 0.6,
-                  child: searchWidget(),
-                ),
-                typing ? _button('Speak Instead') : Container(),
-                showResults ? searchedWords() : Container(),
-                SizedBox(
-                  height: viewportHeight * 0.05,
-                ),
-                showMyWords ? myWordsList(context) : Container(),
-                hideButtons ? Container() : _button('My Words'),
-                hideButtons ? Container() : _button('Practice'),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
@@ -280,8 +291,6 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     });
-    // print(list);
-    // print(list.length);
     return Container(
       height: viewportHeight * 0.4,
       width: viewportWidth * 0.8,

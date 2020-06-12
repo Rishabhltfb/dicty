@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "466211163159",
+    "firebase_url": "https://dicty-app.firebaseio.com",
+    "project_id": "dicty-app",
+    "storage_bucket": "dicty-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:466211163159:android:050038661f58e36982e052",
+        "android_client_info": {
+          "package_name": "com.example.dictyapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "466211163159-6uiqlkrbkhlb9lv7af5h0ob4u31t3s8c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.dictyapp",
+            "certificate_hash": "e350911af65cce52fc5785ffb5c8d037a72c8c18"
+          }
+        },
+        {
+          "client_id": "466211163159-ujsn42dcld7utjoue9gjvi8ed9fosejj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJA_XL6MAuJ1G1mPE2dmuNdvS0pTZVsdg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "466211163159-ujsn42dcld7utjoue9gjvi8ed9fosejj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

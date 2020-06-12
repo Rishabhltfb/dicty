@@ -1,9 +1,11 @@
 import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
+import 'package:dictyapp/scoped_models/main_scoped_model.dart';
 import 'package:dictyapp/screens/sentences_screen.dart';
 import 'package:dictyapp/screens/video_screen.dart';
 import 'package:dictyapp/widgets/wordHead.dart';
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class WordScreen extends StatefulWidget {
   final word;
@@ -16,33 +18,40 @@ class _WordScreenState extends State<WordScreen> {
   var viewportHeight;
   var viewportWidth;
   bool showalldefinitions = false;
+  bool fav = false;
   List<String> definitions = [
     'a male who has the same parents as another or one parent in common with another. (noun)'
   ];
+
   @override
   Widget build(BuildContext context) {
     viewportHeight = getViewportHeight(context);
     viewportWidth = getViewportWidth(context);
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            SizedBox(
-              height: viewportHeight * 0.03,
-            ),
-            navbarButton(),
-            WordHead(viewportHeight, viewportWidth, widget.word),
-            Container(),
-            _definitions(),
-            SizedBox(height: 15),
-            showalldefinitions
-                ? _moreButton('Less Difinitions')
-                : _moreButton('More Difinitions'),
-            _button('Sentences'),
-            _button('Movie Texts'),
-            _button('In Videos'),
-            _button('+ Add to List'),
-          ],
+        child: ScopedModelDescendant<MainModel>(
+          builder: (context, child, model) {
+            fav = model.myWords.contains(widget.word);
+            return Column(
+              children: <Widget>[
+                SizedBox(
+                  height: viewportHeight * 0.03,
+                ),
+                navbarButton(),
+                WordHead(viewportHeight, viewportWidth, widget.word),
+                Container(),
+                _definitions(),
+                SizedBox(height: 15),
+                showalldefinitions
+                    ? _moreButton('Less Difinitions')
+                    : _moreButton('More Difinitions'),
+                _button(title: 'Sentences'),
+                _button(title: 'Movie Texts'),
+                _button(title: 'In Videos'),
+                _button(title: '+ Add to List', model: model),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -99,13 +108,15 @@ class _WordScreenState extends State<WordScreen> {
     );
   }
 
-  Widget _button(String title) {
+  Widget _button({String title, MainModel model}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Container(
         width: viewportWidth * 0.6,
         child: RaisedButton(
-            color: Colors.white,
+            color: title == '+ Add to List'
+                ? fav ? Color(0xfff7c49e) : Colors.white
+                : Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
             ),
@@ -114,7 +125,9 @@ class _WordScreenState extends State<WordScreen> {
               child: Text(
                 title,
                 style: TextStyle(
-                    color: Theme.of(context).primaryColor,
+                    color: title == '+ Add to List'
+                        ? fav ? Colors.white : Theme.of(context).primaryColor
+                        : Theme.of(context).primaryColor,
                     fontSize: viewportHeight * 0.03,
                     fontFamily: 'Krungthep'),
               ),
@@ -132,6 +145,15 @@ class _WordScreenState extends State<WordScreen> {
                     builder: (context) => VideoScreen(widget.word),
                   ),
                 );
+              } else if (title == '+ Add to List') {
+                if (!fav) {
+                  print('Added');
+                  setState(() {
+                    fav = true;
+                    model.myWords.add(widget.word);
+                  });
+                  model.addFavWord(widget.word);
+                }
               }
             }),
       ),

@@ -1,6 +1,8 @@
 import 'package:dictyapp/helpers/dimensions.dart';
+import 'package:dictyapp/scoped_models/main_scoped_model.dart';
 import 'package:dictyapp/widgets/dictyHead.dart';
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class LangSelectScreen extends StatefulWidget {
   @override
@@ -10,7 +12,8 @@ class LangSelectScreen extends StatefulWidget {
 class _LangSelectScreenState extends State<LangSelectScreen> {
   var viewportHeight;
   var viewportWidth;
-  var lang = 'Hindi';
+  var lang = 'Afrikaans';
+  List<String> nativeLanguages = [];
 
   Widget _dropdown() {
     return FlatButton(
@@ -19,32 +22,37 @@ class _LangSelectScreenState extends State<LangSelectScreen> {
         borderRadius: BorderRadius.circular(13),
       ),
       onPressed: () {},
-      child: new DropdownButton<String>(
-        hint: Text(
-          lang,
-          style: TextStyle(color: Theme.of(context).primaryColor),
+      child: Container(
+        width: viewportWidth * 0.3,
+        height: viewportHeight * 0.08,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: <Widget>[
+            new DropdownButton<String>(
+              hint: Text(
+                lang,
+                overflow: TextOverflow.clip,
+                style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
+              items: nativeLanguages.map((String value) {
+                return new DropdownMenuItem<String>(
+                  value: value,
+                  child: new Text(value),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  lang = value;
+                });
+              },
+            )
+          ],
         ),
-        items: <String>[
-          'Hebrew',
-          'Hindi',
-          'Chinese',
-          'English',
-        ].map((String value) {
-          return new DropdownMenuItem<String>(
-            value: value,
-            child: new Text(value),
-          );
-        }).toList(),
-        onChanged: (value) {
-          setState(() {
-            lang = value;
-          });
-        },
       ),
     );
   }
 
-  Widget _continueButton() {
+  Widget _continueButton(MainModel model) {
     return RaisedButton(
         color: Colors.white,
         shape: RoundedRectangleBorder(
@@ -58,7 +66,15 @@ class _LangSelectScreenState extends State<LangSelectScreen> {
               fontFamily: 'Krungthep'),
         ),
         onPressed: () {
-          Navigator.of(context).pushReplacementNamed('/learnLang');
+          var elem = model.nativeLanguagesList.firstWhere((obj) {
+            return obj['name'] == lang;
+          });
+          String langCode = elem['language'];
+          model.addNativeLang(lang, langCode).then((value) {
+            if (value) {
+              Navigator.of(context).pushReplacementNamed('/learnLang');
+            }
+          });
         });
   }
 
@@ -68,41 +84,50 @@ class _LangSelectScreenState extends State<LangSelectScreen> {
     viewportWidth = getDeviceWidth(context);
     return SafeArea(
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(top: 50),
-                child: Container(
-                  width: viewportWidth,
-                  child: DictyLabel(
-                      viewportHeight, viewportWidth, 'Read, Learn, Repeat.'),
-                ),
-              ),
-              SizedBox(height: viewportHeight * 0.2),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(
-                  child: Text(
-                    'You\'re Native at',
-                    style: TextStyle(
-                        fontSize: viewportHeight * 0.028,
-                        fontFamily: 'Krungthep'),
+        body: ScopedModelDescendant<MainModel>(
+          builder: (context, child, model) {
+            List<String> tempList = [];
+            model.nativeLanguagesList.forEach((obj) {
+              tempList.add(obj['name']);
+            });
+            nativeLanguages = tempList;
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 50),
+                    child: Container(
+                      width: viewportWidth,
+                      child: DictyLabel(viewportHeight, viewportWidth,
+                          'Read, Learn, Repeat.'),
+                    ),
                   ),
-                ),
+                  SizedBox(height: viewportHeight * 0.2),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: Text(
+                        'You\'re Native at',
+                        style: TextStyle(
+                            fontSize: viewportHeight * 0.028,
+                            fontFamily: 'Krungthep'),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: viewportWidth * 0.5,
+                    child: _dropdown(),
+                  ),
+                  SizedBox(height: viewportHeight * 0.35),
+                  Container(
+                    width: viewportWidth * 0.5,
+                    child: _continueButton(model),
+                  ),
+                ],
               ),
-              Container(
-                width: viewportWidth * 0.5,
-                child: _dropdown(),
-              ),
-              SizedBox(height: viewportHeight * 0.35),
-              Container(
-                width: viewportWidth * 0.5,
-                child: _continueButton(),
-              )
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

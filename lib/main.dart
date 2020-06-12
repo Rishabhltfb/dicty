@@ -22,6 +22,16 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final MainModel _model = MainModel();
+  // var _isAuthenticated = false;
+
+  @override
+  void initState() {
+    _model.autoAuthenticate().then((value) {
+      // _isAuthenticated = value;
+    });
+    _model.fetchLangs();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,10 +60,10 @@ class _MyAppState extends State<MyApp> {
               iconTheme: IconThemeData(color: Colors.white)),
           debugShowCheckedModeBanner: false,
           routes: {
-            '/': (BuildContext context) => AuthScreen(),
+            '/': (BuildContext context) => AuthScreen(_model),
             '/langSelect': (BuildContext context) => LangSelectScreen(),
             '/learnLang': (BuildContext context) => LearnLangScreen(),
-            '/home': (BuildContext context) => HomeScreen(),
+            '/home': (BuildContext context) => HomeScreen(_model),
             '/settings': (BuildContext context) => SettingScreen(),
             '/practice': (BuildContext context) => PracticeScreen(),
           },

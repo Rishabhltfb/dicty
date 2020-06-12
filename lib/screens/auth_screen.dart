@@ -1,8 +1,12 @@
 import 'package:dictyapp/helpers/dimensions.dart';
+import 'package:dictyapp/scoped_models/main_scoped_model.dart';
 import 'package:dictyapp/widgets/dictyHead.dart';
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class AuthScreen extends StatefulWidget {
+  final MainModel model;
+  AuthScreen(this.model);
   @override
   _AuthScreenState createState() => _AuthScreenState();
 }
@@ -10,6 +14,14 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
   var viewportHeight;
   var viewportWidth;
+  bool haveNative = false;
+  @override
+  void initState() {
+    widget.model.haveNative().then((value) {
+      haveNative = value;
+    });
+    super.initState();
+  }
 
   Widget _signInButtonF(String title, String img, String method) {
     return Padding(
@@ -44,7 +56,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  Widget _signInButton() {
+  Widget _signInButton(MainModel model, BuildContext context) {
     return RaisedButton(
         color: Colors.white,
         shape: RoundedRectangleBorder(
@@ -63,7 +75,25 @@ class _AuthScreenState extends State<AuthScreen> {
           ],
         ),
         onPressed: () {
-          Navigator.of(context).pushReplacementNamed('/langSelect');
+          model.signIn().then((bool value) {
+            if (value) {
+              haveNative
+                  ? Navigator.of(context).pushReplacementNamed('/home')
+                  : Navigator.of(context).pushReplacementNamed('/langSelect');
+            } else {
+              print('Failed');
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[Text('SignIn Failed')],
+                  ),
+                ),
+              );
+            }
+          }).catchError((err) {
+            print(err);
+          });
         });
   }
 
@@ -72,27 +102,30 @@ class _AuthScreenState extends State<AuthScreen> {
     viewportHeight = getViewportHeight(context);
     viewportWidth = getDeviceWidth(context);
     return SafeArea(
-      child: Scaffold(
-          body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 50),
-              child: Container(
-                width: viewportWidth,
-                child: DictyLabel(
-                    viewportHeight, viewportWidth, 'Read, Learn, Repeat.'),
-              ),
-            ),
-            SizedBox(height: viewportHeight * 0.3),
-            Container(
-              width: viewportWidth * 0.6,
-              child: _signInButton(),
-            ),
-            _signInButtonF(
-                'Sign Up with Google', 'assets/images/google.jpeg', 'signup'),
-          ],
+      child: Scaffold(body: SingleChildScrollView(
+        child: ScopedModelDescendant<MainModel>(
+          builder: (context, child, model) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(top: 50),
+                  child: Container(
+                    width: viewportWidth,
+                    child: DictyLabel(
+                        viewportHeight, viewportWidth, 'Read, Learn, Repeat.'),
+                  ),
+                ),
+                SizedBox(height: viewportHeight * 0.3),
+                Container(
+                  width: viewportWidth * 0.6,
+                  child: _signInButton(model, context),
+                ),
+                _signInButtonF('Sign Up with Google',
+                    'assets/images/google.jpeg', 'signup'),
+              ],
+            );
+          },
         ),
       )),
     );

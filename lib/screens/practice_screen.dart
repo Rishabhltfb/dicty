@@ -53,7 +53,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
       child: Container(
         width: viewportWidth * 0.4,
         child: RaisedButton(
-            color: Colors.white.withOpacity(0.65),
+            color: Color(0xfff7c49e),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
             ),

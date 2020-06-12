@@ -1,12 +1,17 @@
-import 'package:dictyapp/models/user.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../api/keys.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class ConnectedModel extends Model {
-  final uri = ApiKeys.uri;
+  final ibmTransKey = ApiKeys.ibmtranskey;
 
-  User authenticatedUser = null;
+  FirebaseUser authenticatedUser = null;
   bool isLoading = false;
   bool isUserAuthenticated = false;
+  String nativeLang = '';
+  String nativeLangCode = '';
+  List<String> myWords = [];
+  List nativeLanguagesList = [];
+  Map<String, dynamic> azureLanguages;
 }
