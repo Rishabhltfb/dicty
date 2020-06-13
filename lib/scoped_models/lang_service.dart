@@ -33,14 +33,16 @@ class LangService extends ConnectedModel {
     }
   }
 
-  Future<Null> translateIBM(String word) async {
+  Future<String> translateIBM(List wordList) async {
     String username = 'apikey';
     String password = ibmTransKey;
     String nativelangcode = nativeLangCode;
     String basicAuth =
         'Basic ' + base64Encode(utf8.encode('$username:$password'));
     List<String> words = [];
-    words.add(word);
+    wordList.forEach((word) {
+      words.add(word);
+    });
     final Map<String, dynamic> body = {
       'text': words,
       'model_id': "en-${nativelangcode}",
@@ -60,36 +62,17 @@ class LangService extends ConnectedModel {
         final Map<String, dynamic> res = json.decode(response.body);
 
         print(res);
+        List translations = res['translations'];
+        translations.forEach((obj) {
+          print(obj['translation']);
+        });
+        return 'ok';
       } else {
-        print('!!!1111111!---------rishabh');
+        print('Invalid status code : ${response.statusCode}');
+        return 'not ok';
       }
     } catch (err) {
       print(err);
     }
   }
-
-  // Future<Null> fetchLangs() async {
-  //   try {
-  //     final http.Response response = await http.get(
-  //       'https://api.cognitive.microsofttranslator.com/languages?api-version=3.0',
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       print('fetch success in lang');
-  //       final Map<String, dynamic> res = json.decode(response.body);
-  //       Map<String, dynamic> temp = res['translation'];
-  //       azureLanguages = temp;
-  //       List<String> list = [];
-  //       temp.forEach((key, value) {
-  //         list.add(value['name']);
-  //       });
-  //       nativeLanguageList = list;
-  //       // print(res['translation']);
-  //     } else {
-  //       print('!!!1111111!');
-  //     }
-  //   } catch (err) {
-  //     print(err);
-  //   }
-  // }
 }

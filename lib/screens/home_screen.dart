@@ -145,50 +145,71 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       width: viewportWidth * 0.8,
       height: viewportHeight * 0.5,
-      child: ListView.separated(
-        itemCount: mywords.length,
-        padding: EdgeInsets.symmetric(horizontal: 5),
-        physics: BouncingScrollPhysics(),
-        itemBuilder: (BuildContext context, int index) {
-          var word = mywords[index];
-          return ListTile(
-            title: Text(
-              word,
-              style: TextStyle(
-                  fontFamily: 'Krungthep',
-                  color: Theme.of(context).primaryColor),
-            ),
-            onTap: () {
-              model.translateIBM(word);
-            },
-            trailing: Container(
-              width: viewportWidth * 0.15,
-              child: Row(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
-                    child: Icon(
-                      Icons.translate,
-                      size: viewportHeight * 0.025,
-                      color: Theme.of(context).primaryColor,
+      child: mywords.length > 0
+          ? ListView.separated(
+              itemCount: mywords.length,
+              padding: EdgeInsets.symmetric(horizontal: 5),
+              physics: BouncingScrollPhysics(),
+              itemBuilder: (BuildContext context, int index) {
+                var word = mywords[index];
+                return ListTile(
+                  title: Text(
+                    word,
+                    style: TextStyle(
+                        fontFamily: 'Krungthep',
+                        color: Theme.of(context).primaryColor),
+                  ),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => WordScreen(word),
+                      ),
+                    );
+                  },
+                  trailing: Container(
+                    width: viewportWidth * 0.27,
+                    child: Row(
+                      children: <Widget>[
+                        IconButton(
+                          icon: Icon(
+                            Icons.translate,
+                            size: viewportHeight * 0.02,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          onPressed: () {
+                            List wordList = [];
+                            wordList.add(word);
+                            model.translateIBM(wordList);
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            MyFlutterApp.volume,
+                            size: viewportHeight * 0.02,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          onPressed: () {},
+                        ),
+                      ],
                     ),
                   ),
-                  Icon(
-                    MyFlutterApp.volume,
-                    size: viewportHeight * 0.025,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ],
+                ); // Add Comment tile
+              },
+              separatorBuilder: (context, index) {
+                return Divider(
+                  color: Theme.of(context).primaryColor,
+                );
+              },
+            )
+          : Center(
+              child: Text(
+                'No Words',
+                style: TextStyle(
+                    color: Colors.grey,
+                    fontFamily: 'Krungthep',
+                    fontSize: viewportHeight * 0.05),
               ),
             ),
-          ); // Add Comment tile
-        },
-        separatorBuilder: (context, index) {
-          return Divider(
-            color: Theme.of(context).primaryColor,
-          );
-        },
-      ),
     );
   }
 

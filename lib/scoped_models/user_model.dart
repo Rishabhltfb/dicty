@@ -58,6 +58,7 @@ class UserModel extends ConnectedModel {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
     await prefs.remove('native');
+    await prefs.remove('nativeCode');
     print('user sign out');
   }
 
@@ -105,8 +106,10 @@ class UserModel extends ConnectedModel {
   Future<bool> haveNative() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String nativelang = prefs.getString('native');
+    String nLC = prefs.getString('nativeCode');
     nativeLang = nativelang;
-    if (nativelang != null) {
+    nativeLangCode = nLC;
+    if (nativelang != null && nativeLangCode != null) {
       return true;
     } else {
       return false;

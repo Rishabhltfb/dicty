@@ -14,8 +14,9 @@ class SettingScreen extends StatefulWidget {
 class _SettingScreenState extends State<SettingScreen> {
   var viewportHeight;
   var viewportWidth;
-  var lang = 'Hebrew';
+  var lang = '';
   var email = 'avishay89051@gmail.com';
+  List<String> languages = [];
 
   Widget _button(String title, MainModel model) {
     return Padding(
@@ -57,32 +58,36 @@ class _SettingScreenState extends State<SettingScreen> {
         borderRadius: BorderRadius.circular(13),
       ),
       onPressed: () {},
-      child: new DropdownButton<String>(
-        hint: Text(
-          lang,
-          style: TextStyle(color: Theme.of(context).primaryColor),
+      child: Container(
+        width: viewportWidth * 0.3,
+        height: viewportHeight * 0.08,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: <Widget>[
+            new DropdownButton<String>(
+              hint: Text(
+                lang,
+                style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
+              items: languages.map((String value) {
+                return new DropdownMenuItem<String>(
+                  value: value,
+                  child: new Text(value),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  var elem = model.nativeLanguagesList.firstWhere((obj) {
+                    return obj['name'] == value;
+                  });
+                  String langCode = elem['language'];
+                  lang = value;
+                  model.addNativeLang(lang, langCode);
+                });
+              },
+            )
+          ],
         ),
-        items: <String>[
-          'Hebrew',
-          'Hindi',
-          'Chinese',
-          'English',
-        ].map((String value) {
-          return new DropdownMenuItem<String>(
-            value: value,
-            child: new Text(value),
-          );
-        }).toList(),
-        onChanged: (value) {
-          setState(() {
-            var elem = model.nativeLanguagesList.firstWhere((obj) {
-              return obj['name'] == value;
-            });
-            String langCode = elem['language'];
-            lang = value;
-            model.addNativeLang(lang, langCode);
-          });
-        },
       ),
     );
   }
@@ -96,6 +101,10 @@ class _SettingScreenState extends State<SettingScreen> {
         body: ScopedModelDescendant<MainModel>(
           builder: (context, child, model) {
             lang = model.nativeLang;
+            model.nativeLanguagesList.forEach((obj) {
+              languages.add(obj['name']);
+            });
+            email = model.authenticatedUser.email;
             return SingleChildScrollView(
               child: Column(
                 children: <Widget>[
