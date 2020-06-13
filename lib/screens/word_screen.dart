@@ -19,6 +19,7 @@ class _WordScreenState extends State<WordScreen> {
   var viewportWidth;
   bool showalldefinitions = false;
   bool fav = false;
+  List youtubeList = [];
   List<String> definitions = [
     'a male who has the same parents as another or one parent in common with another. (noun)'
   ];
@@ -32,6 +33,11 @@ class _WordScreenState extends State<WordScreen> {
         child: ScopedModelDescendant<MainModel>(
           builder: (context, child, model) {
             fav = model.myWords.contains(widget.word);
+            if (youtubeList.length == 0) {
+              model.searchYoutube(widget.word).then((value) {
+                youtubeList = value;
+              });
+            }
             return Column(
               children: <Widget>[
                 SizedBox(
@@ -142,7 +148,7 @@ class _WordScreenState extends State<WordScreen> {
               } else if (title == 'In Videos') {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => VideoScreen(widget.word),
+                    builder: (context) => VideoScreen(widget.word, youtubeList),
                   ),
                 );
               } else if (title == '+ Add to List') {

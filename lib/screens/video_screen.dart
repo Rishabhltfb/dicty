@@ -2,10 +2,13 @@ import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
 import 'package:dictyapp/widgets/wordHead.dart';
 import 'package:flutter/material.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoScreen extends StatefulWidget {
   final word;
-  VideoScreen(this.word);
+  final List youtubeList;
+
+  VideoScreen(this.word, this.youtubeList);
   @override
   _VideoScreenState createState() => _VideoScreenState();
 }
@@ -15,9 +18,27 @@ class _VideoScreenState extends State<VideoScreen> {
   var viewportWidth;
   bool showDefinitions = false;
   bool showAllDefinitions = false;
+  var id = '';
+  var startTime = '';
   List<String> definitions = [
     'a male who has the same parents as another or one parent in common with another. (noun)'
   ];
+  YoutubePlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    id = widget.youtubeList[0]['vid'];
+    startTime = widget.youtubeList[0]['start'];
+    _controller = YoutubePlayerController(
+      initialVideoId: id,
+      flags: YoutubePlayerFlags(
+        mute: false,
+        autoPlay: true,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     viewportHeight = getViewportHeight(context);
@@ -48,9 +69,17 @@ class _VideoScreenState extends State<VideoScreen> {
             Container(
               height: viewportHeight * 0.3,
               width: viewportWidth,
-              child: Image.asset(
-                'assets/images/youtube.png',
-                fit: BoxFit.cover,
+              // child: Image.asset(
+              //   'assets/images/youtube.png',
+              //   fit: BoxFit.cover,
+              // ),
+              child: YoutubePlayer(
+                controller: _controller,
+                showVideoProgressIndicator: true,
+                onReady: () {
+                  _controller.seekTo(Duration(seconds: int.parse(startTime)));
+                  print('Player is ready.');
+                },
               ),
             ),
           ],

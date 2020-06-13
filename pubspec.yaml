@@ -33,6 +33,7 @@ dependencies:
   not_paid: ^1.0.0
   firebase_auth:
   google_sign_in:
+  youtube_player_flutter: ^6.0.3+2
 
 dev_dependencies:
   flutter_test:

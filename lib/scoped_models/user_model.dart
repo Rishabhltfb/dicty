@@ -135,10 +135,9 @@ class UserModel extends ConnectedModel {
         wordListData.forEach((String id, dynamic entryData) {
           final String entry = entryData['word'];
           fetchedWordList.add(entry);
-          print(entry);
+          // print(entry);
         });
         myWords = fetchedWordList;
-        print(myWords.length);
       } else {
         print(
             "Fetch Words Error: ${json.decode(response.body)["error"].toString()}");

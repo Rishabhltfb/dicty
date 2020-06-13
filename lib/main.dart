@@ -11,6 +11,9 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:not_paid/not_paid.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(MyApp());
 }
 

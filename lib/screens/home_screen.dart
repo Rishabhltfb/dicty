@@ -21,18 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool showMyWords = false;
   bool typing = false;
   bool showResults = false;
-  List<String> dict_words = [
-    'Brain',
-    'Brother',
-    'Breed',
-    'Broke',
-    'Break',
-    'Brain',
-    'Brother',
-    'Breed',
-    'Broke',
-    'Break',
-  ];
+  List<dynamic> dict_words = [];
   @override
   void initState() {
     widget.model.fetchWords().then((_) {
@@ -69,15 +58,21 @@ class _HomeScreenState extends State<HomeScreen> {
         child: TextFormField(
           onChanged: (String value) {
             if (value != '') {
-              setState(() {
-                typing = true;
-                hideButtons = true;
-                showResults = true;
+              widget.model.searchWordDict(value).then((list) {
+                if (list != null && typing) {
+                  setState(() {
+                    dict_words = list;
+                    typing = true;
+                    hideButtons = true;
+                    showResults = true;
+                  });
+                }
               });
             } else {
               FocusScope.of(context).requestFocus(FocusNode());
               _formKey.currentState.reset();
               setState(() {
+                dict_words = [];
                 hideButtons = false;
                 typing = false;
                 showResults = false;
@@ -188,7 +183,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             size: viewportHeight * 0.02,
                             color: Theme.of(context).primaryColor,
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            model.tTSIBM(word);
+                          },
                         ),
                       ],
                     ),
@@ -304,12 +301,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget searchedWords() {
     var list = [];
-    dict_words.forEach((word) {
-      if (word.length >= searchWord.length) {
-        if (word.toLowerCase().substring(0, searchWord.length) ==
-            searchWord.toLowerCase()) {
-          list.add(word);
-        }
+    dict_words.forEach((wordobj) {
+      if (wordobj is String) {
+        list.add(wordobj);
+      } else {
+        list.add(wordobj['meta']['id']);
       }
     });
     return Container(
