@@ -31,14 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  List<String> mywords = [
-    'Psychology',
-    'Brother',
-    'Winner',
-    'Complex',
-    'Song',
-    'Practice',
-  ];
+  List<String> mywords = [];
 
   Widget searchWidget() {
     return Container(
@@ -184,7 +177,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Theme.of(context).primaryColor,
                           ),
                           onPressed: () {
-                            model.tTSIBM(word);
+                            widget.model.initializeTts();
+                            model.ttsspeak(word).then((_) {
+                              // model.flutterTts.stop();
+                            });
                           },
                         ),
                       ],

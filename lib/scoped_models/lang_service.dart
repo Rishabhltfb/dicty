@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
 
 import './connected_scoped_model.dart';
@@ -105,6 +106,28 @@ class LangService extends ConnectedModel {
       }
     } catch (err) {
       print(err);
+    }
+  }
+
+  FlutterTts flutterTts;
+
+  initializeTts() {
+    flutterTts = FlutterTts();
+  }
+
+  Future ttsspeak(String text) async {
+    if (text != null && text.isNotEmpty) {
+      var result = await flutterTts.speak(text);
+      if (result == 1) {
+        print('Playing audio');
+      }
+    }
+  }
+
+  Future ttsstop() async {
+    var result = await flutterTts.stop();
+    if (result == 1) {
+      print('Stop playing');
     }
   }
 }

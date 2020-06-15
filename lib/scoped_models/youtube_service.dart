@@ -16,7 +16,6 @@ class YoutubeService extends ConnectedModel {
       if (response.statusCode == 200) {
         print('Youglish search success.');
         final res = json.decode(response.body);
-
         return res['results'];
       } else {
         print('Invalid status code : ${response.statusCode}');

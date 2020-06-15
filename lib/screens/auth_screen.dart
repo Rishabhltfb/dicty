@@ -23,12 +23,31 @@ class _AuthScreenState extends State<AuthScreen> {
     super.initState();
   }
 
-  Widget _signInButtonF(String title, String img, String method) {
+  Widget _signUpButton(
+      String title, String img, String method, MainModel model) {
     return Padding(
       padding: const EdgeInsets.only(top: 18.0),
       child: OutlineButton(
         splashColor: Colors.white,
-        onPressed: () {},
+        onPressed: () {
+          model.signIn().then((bool value) {
+            if (value) {
+              Navigator.of(context).pushReplacementNamed('/langSelect');
+            } else {
+              print('Failed');
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[Text('SignUp Failed')],
+                  ),
+                ),
+              );
+            }
+          }).catchError((err) {
+            print(err);
+          });
+        },
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
         highlightElevation: 0,
         borderSide: BorderSide(color: Colors.white),
@@ -121,8 +140,8 @@ class _AuthScreenState extends State<AuthScreen> {
                   width: viewportWidth * 0.6,
                   child: _signInButton(model, context),
                 ),
-                _signInButtonF('Sign Up with Google',
-                    'assets/images/google.jpeg', 'signup'),
+                _signUpButton('Sign Up with Google',
+                    'assets/images/google.jpeg', 'signup', model),
               ],
             );
           },

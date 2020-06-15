@@ -20,9 +20,15 @@ class _WordScreenState extends State<WordScreen> {
   bool showalldefinitions = false;
   bool fav = false;
   List youtubeList = [];
+  int currDefTransindex;
   List<String> definitions = [
     'a male who has the same parents as another or one parent in common with another. (noun)'
   ];
+  @override
+  void initState() {
+    currDefTransindex = -1;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +39,11 @@ class _WordScreenState extends State<WordScreen> {
         child: ScopedModelDescendant<MainModel>(
           builder: (context, child, model) {
             fav = model.myWords.contains(widget.word);
-            if (youtubeList.length == 0) {
-              model.searchYoutube(widget.word).then((value) {
-                youtubeList = value;
-              });
-            }
+            // if (youtubeList.length == 0) {
+            //   model.searchYoutube(widget.word).then((value) {
+            //     youtubeList = value;
+            //   });
+            // }
             return Column(
               children: <Widget>[
                 SizedBox(
@@ -46,7 +52,7 @@ class _WordScreenState extends State<WordScreen> {
                 navbarButton(),
                 WordHead(viewportHeight, viewportWidth, widget.word),
                 Container(),
-                _definitions(),
+                _definitions(model),
                 SizedBox(height: 15),
                 showalldefinitions
                     ? _moreButton('Less Difinitions')
@@ -84,12 +90,6 @@ class _WordScreenState extends State<WordScreen> {
           if (title == 'More Difinitions') {
             setState(() {
               showalldefinitions = true;
-              definitions.add(
-                  'a male who has the same parents as another or one parent in common with another. (noun)');
-              definitions.add(
-                  'a male who has the same parents as another or one parent in common with another. (noun)');
-              definitions.add(
-                  'a male who has the same parents as another or one parent in common with another. (noun)');
             });
           } else {
             setState(() {
@@ -185,92 +185,129 @@ class _WordScreenState extends State<WordScreen> {
     );
   }
 
-  Widget _definitions() {
+  Widget _definitions(MainModel model) {
     return Container(
       width: viewportWidth * 0.8,
       height: showalldefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25,
       child: ListView.builder(
         itemCount: definitions.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            // leading: Text((index + 1).toString()),
-            leading: Container(
-              height: 22,
-              width: 22,
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
+          return Column(
+            children: <Widget>[
+              ListTile(
+                // leading: Text((index + 1).toString()),
+                leading: Container(
+                  height: 22,
+                  width: 22,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white,
+                      ),
+                    ],
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(23),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      (index + 1).toString(),
+                      style: TextStyle(color: Theme.of(context).primaryColor),
+                    ),
+                  ),
+                ),
+                title: Text(
+                  definitions[index],
+                  style: TextStyle(
                     color: Colors.white,
+                    fontSize: viewportHeight * 0.02,
                   ),
-                ],
-                borderRadius: BorderRadius.all(
-                  Radius.circular(23),
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: currDefTransindex == index
+                                  ? Colors.blue
+                                  : Colors.white,
+                            ),
+                          ],
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(13),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 2),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (currDefTransindex == index) {
+                                  currDefTransindex = -1;
+                                } else {
+                                  currDefTransindex = index;
+                                }
+                              });
+                            },
+                            child: Icon(
+                              Icons.translate,
+                              size: viewportHeight * 0.03,
+                              color: currDefTransindex == index
+                                  ? Colors.white
+                                  : Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white,
+                            ),
+                          ],
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(13),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 2),
+                          child: GestureDetector(
+                            onTap: () {
+                              model.initializeTts();
+                              model.ttsspeak(definitions[index]);
+                            },
+                            child: Icon(
+                              MyFlutterApp.volume,
+                              size: viewportHeight * 0.03,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              child: Center(
-                child: Text(
-                  (index + 1).toString(),
-                  style: TextStyle(color: Theme.of(context).primaryColor),
-                ),
-              ),
-            ),
-            title: Text(
-              definitions[index],
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: viewportHeight * 0.02,
-              ),
-            ),
-            subtitle: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
-              child: Row(
-                children: <Widget>[
-                  Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
+              currDefTransindex == index
+                  ? ListTile(
+                      leading: Icon(Icons.translate),
+                      title: Text(
+                        definitions[index],
+                        style: TextStyle(
                           color: Colors.white,
+                          fontSize: viewportHeight * 0.02,
                         ),
-                      ],
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(13),
                       ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 2),
-                      child: Icon(
-                        Icons.translate,
-                        size: viewportHeight * 0.03,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white,
-                        ),
-                      ],
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(13),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 2),
-                      child: Icon(
-                        MyFlutterApp.volume,
-                        size: viewportHeight * 0.03,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                    )
+                  : Container(),
+            ],
           );
         },
       ),
