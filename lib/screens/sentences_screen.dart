@@ -1,11 +1,13 @@
 import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
+import 'package:dictyapp/scoped_models/main_scoped_model.dart';
 import 'package:dictyapp/widgets/wordHead.dart';
 import 'package:flutter/material.dart';
 
 class SentencesScreen extends StatefulWidget {
-  final word;
-  SentencesScreen(this.word);
+  final wordobj;
+  final MainModel model;
+  SentencesScreen(this.wordobj, this.model);
   @override
   _SentencesScreenState createState() => _SentencesScreenState();
 }
@@ -13,18 +15,53 @@ class SentencesScreen extends StatefulWidget {
 class _SentencesScreenState extends State<SentencesScreen> {
   var viewportHeight;
   var viewportWidth;
+  int currDefTransIndex;
+  int currSenTransIndex;
   bool showDefinitions = false;
   bool showAllDefinitions = false;
-  List<String> definitionsList = [
-    'a male who has the same parents as another or one parent in common with another. (noun)'
-  ];
-  List<String> sentences = [
-    'a male who has the same parents as another or one parent in common with another. (noun)',
-    'a male who has the same parents as another or one parent in common with another. (noun)',
-    'a male who has the same parents as another or one parent in common with another. (noun)',
-    'a male who has the same parents as another or one parent in common with another. (noun)',
-    'a male who has the same parents as another or one parent in common with another. (noun)',
-  ];
+  bool showDefTrans = false;
+  bool showSenTrans = false;
+  List definitionsList = [];
+  List defTransList = [];
+
+  List sentences = [];
+  List sentenceTransList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    currDefTransIndex = -1;
+    currSenTransIndex = -1;
+
+    definitionsList = widget.wordobj['shortdef'];
+    widget.wordobj['def'][0]['sseq'][0][0][1]['dt'][1][1].forEach((obj) {
+      sentences.add(widget.model.parseSentence(obj['t']));
+    });
+
+    setTransList();
+  }
+
+  void setTransList() {
+    if (definitionsList.isNotEmpty) {
+      widget.model.translateIBM(definitionsList).then((transList) {
+        var tempList = [];
+        transList.forEach((element) {
+          tempList.add(element['translation']);
+        });
+        defTransList = tempList;
+      });
+    }
+    if (sentences.isNotEmpty) {
+      widget.model.translateIBM(sentences).then((transList) {
+        var tempList = [];
+        transList.forEach((element) {
+          tempList.add(element['translation']);
+        });
+        sentenceTransList = tempList;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     viewportHeight = getViewportHeight(context);
@@ -37,7 +74,8 @@ class _SentencesScreenState extends State<SentencesScreen> {
               height: viewportHeight * 0.03,
             ),
             navbarButton(),
-            WordHead(viewportHeight, viewportWidth, widget.word),
+            WordHead(
+                viewportHeight, viewportWidth, widget.wordobj['meta']['id']),
             Container(),
             showDefinitions ? _definitions('Definitions') : Container(),
             SizedBox(height: 15),
@@ -82,19 +120,8 @@ class _SentencesScreenState extends State<SentencesScreen> {
             } else if (title == 'Close Definitions') {
               showDefinitions = false;
               showAllDefinitions = false;
-              var firstDefinition = definitionsList[0];
-              List<String> list = [];
-              list.add(firstDefinition);
-              definitionsList = list;
             } else {
               showAllDefinitions = true;
-
-              definitionsList.add(
-                  'a male who has the same parents as another or one parent in common with another. (noun)');
-              definitionsList.add(
-                  'a male who has the same parents as another or one parent in common with another. (noun)');
-              definitionsList.add(
-                  'a male who has the same parents as another or one parent in common with another. (noun)');
             }
           });
         },
@@ -160,10 +187,13 @@ class _SentencesScreenState extends State<SentencesScreen> {
 
   Widget _definitions(String title) {
     var definitions;
+    var transList;
     if (title == 'Sentences') {
       definitions = sentences;
+      transList = sentenceTransList;
     } else {
       definitions = definitionsList;
+      transList = defTransList;
     }
     return Container(
       width: viewportWidth * 0.8,
@@ -171,87 +201,157 @@ class _SentencesScreenState extends State<SentencesScreen> {
           ? viewportHeight * 0.6
           : (showAllDefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25),
       child: ListView.builder(
-        itemCount: definitions.length,
+        itemCount: title != 'Sentences'
+            ? (showAllDefinitions ? definitions.length : 1)
+            : definitions.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            // leading: Text((index + 1).toString()),
-            leading: Container(
-              height: 22,
-              width: 22,
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
+          return Column(
+            children: <Widget>[
+              ListTile(
+                // leading: Text((index + 1).toString()),
+                leading: Container(
+                  height: 22,
+                  width: 22,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white,
+                      ),
+                    ],
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(23),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      (index + 1).toString(),
+                      style: TextStyle(color: Theme.of(context).primaryColor),
+                    ),
+                  ),
+                ),
+                title: Text(
+                  definitions[index],
+                  style: TextStyle(
                     color: Colors.white,
+                    fontSize: viewportHeight * 0.02,
                   ),
-                ],
-                borderRadius: BorderRadius.all(
-                  Radius.circular(23),
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: title == 'Sentences'
+                                  ? ((currSenTransIndex == index)
+                                      ? Colors.blue
+                                      : Colors.white)
+                                  : ((currDefTransIndex == index
+                                      ? Colors.blue
+                                      : Colors.white)),
+                            ),
+                          ],
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(13),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 2),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (title == 'Sentences') {
+                                  if (currSenTransIndex != index) {
+                                    currSenTransIndex = index;
+                                  } else {
+                                    currSenTransIndex = -1;
+                                  }
+                                  showSenTrans = !showSenTrans;
+                                } else {
+                                  if (currDefTransIndex != index) {
+                                    currDefTransIndex = index;
+                                  } else {
+                                    currDefTransIndex = -1;
+                                  }
+                                  showDefTrans = !showDefTrans;
+                                }
+                              });
+                            },
+                            child: Icon(
+                              Icons.translate,
+                              size: viewportHeight * 0.03,
+                              color: title == 'Sentences'
+                                  ? ((currSenTransIndex == index)
+                                      ? Colors.white
+                                      : Theme.of(context).primaryColor)
+                                  : ((currDefTransIndex == index
+                                      ? Colors.white
+                                      : Theme.of(context).primaryColor)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white,
+                            ),
+                          ],
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(13),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 2),
+                          child: GestureDetector(
+                            onTap: () {
+                              widget.model.initializeTts();
+                              widget.model.ttsspeak(definitions[index]);
+                            },
+                            child: Icon(
+                              MyFlutterApp.volume,
+                              size: viewportHeight * 0.03,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              child: Center(
-                child: Text(
-                  (index + 1).toString(),
-                  style: TextStyle(color: Theme.of(context).primaryColor),
-                ),
-              ),
-            ),
-            title: Text(
-              definitions[index],
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: viewportHeight * 0.02,
-              ),
-            ),
-            subtitle: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
-              child: Row(
-                children: <Widget>[
-                  Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white,
-                        ),
-                      ],
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(13),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 2),
-                      child: Icon(
-                        Icons.translate,
-                        size: viewportHeight * 0.03,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white,
-                        ),
-                      ],
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(13),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 2),
-                      child: Icon(
-                        MyFlutterApp.volume,
-                        size: viewportHeight * 0.03,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+              title == 'Sentences'
+                  ? (currSenTransIndex == index
+                      ? ListTile(
+                          leading: Icon(Icons.translate),
+                          title: Text(
+                            transList[index],
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: viewportHeight * 0.02,
+                            ),
+                          ),
+                        )
+                      : Container())
+                  : (currDefTransIndex == index
+                      ? ListTile(
+                          leading: Icon(Icons.translate),
+                          title: Text(
+                            transList[index],
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: viewportHeight * 0.02,
+                            ),
+                          ),
+                        )
+                      : Container()),
+            ],
           );
         },
       ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
 import 'package:dictyapp/scoped_models/main_scoped_model.dart';
@@ -8,8 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class WordScreen extends StatefulWidget {
-  final word;
-  WordScreen(this.word);
+  final wordobj;
+  final MainModel model;
+  WordScreen(this.wordobj, this.model);
   @override
   _WordScreenState createState() => _WordScreenState();
 }
@@ -19,15 +22,49 @@ class _WordScreenState extends State<WordScreen> {
   var viewportWidth;
   bool showalldefinitions = false;
   bool fav = false;
+  bool _isLoading = false;
   List youtubeList = [];
   int currDefTransindex;
-  List<String> definitions = [
-    'a male who has the same parents as another or one parent in common with another. (noun)'
-  ];
+  List definitions = [];
+  List defTransList = [];
   @override
   void initState() {
+    print(widget.wordobj);
     currDefTransindex = -1;
+    _isLoading = true;
     super.initState();
+
+    if (widget.wordobj is String) {
+      print('wordobj is String');
+    } else {
+      List tempList = [];
+      widget.model.myWords.forEach((wordobj) {
+        tempList.add(wordobj['meta']['id']);
+      });
+      fav = tempList.contains(widget.wordobj['meta']['id']);
+    }
+    // if (youtubeList.length == 0 && widget.model.youglishlimit < 29) {
+    //   widget.model.searchYoutube(widget.wordobj['meta']['id']).then((value) {
+    //     youtubeList = value;
+    //   });
+    // }
+    if (definitions.length == 0) {
+      definitions = widget.wordobj['shortdef'];
+    }
+    if (defTransList.length == 0) {
+      widget.model.translateIBM(definitions).then((transList) {
+        var tempList = [];
+        transList.forEach((element) {
+          tempList.add(element['translation']);
+        });
+        defTransList = tempList;
+        Timer(Duration(milliseconds: 500), () {
+          setState(() {
+            _isLoading = false;
+          });
+        });
+      });
+    }
   }
 
   @override
@@ -38,31 +75,31 @@ class _WordScreenState extends State<WordScreen> {
       body: SingleChildScrollView(
         child: ScopedModelDescendant<MainModel>(
           builder: (context, child, model) {
-            fav = model.myWords.contains(widget.word);
-            // if (youtubeList.length == 0) {
-            //   model.searchYoutube(widget.word).then((value) {
-            //     youtubeList = value;
-            //   });
-            // }
-            return Column(
-              children: <Widget>[
-                SizedBox(
-                  height: viewportHeight * 0.03,
-                ),
-                navbarButton(),
-                WordHead(viewportHeight, viewportWidth, widget.word),
-                Container(),
-                _definitions(model),
-                SizedBox(height: 15),
-                showalldefinitions
-                    ? _moreButton('Less Difinitions')
-                    : _moreButton('More Difinitions'),
-                _button(title: 'Sentences'),
-                _button(title: 'Movie Texts'),
-                _button(title: 'In Videos'),
-                _button(title: '+ Add to List', model: model),
-              ],
-            );
+            return _isLoading
+                ? Container(
+                    height: viewportHeight,
+                    width: viewportWidth,
+                    child: Center(child: CircularProgressIndicator()))
+                : Column(
+                    children: <Widget>[
+                      SizedBox(
+                        height: viewportHeight * 0.03,
+                      ),
+                      navbarButton(),
+                      WordHead(viewportHeight, viewportWidth,
+                          widget.wordobj['meta']['id']),
+                      Container(),
+                      _definitions(model),
+                      SizedBox(height: 15),
+                      showalldefinitions
+                          ? _moreButton('Less Difinitions')
+                          : _moreButton('More Difinitions'),
+                      _button(title: 'Sentences', model: model),
+                      _button(title: 'Movie Texts'),
+                      _button(title: 'In Videos'),
+                      _button(title: '+ Add to List', model: model),
+                    ],
+                  );
           },
         ),
       ),
@@ -94,9 +131,6 @@ class _WordScreenState extends State<WordScreen> {
           } else {
             setState(() {
               showalldefinitions = false;
-              var definition1 = definitions[1];
-              definitions = [];
-              definitions.add(definition1);
             });
           }
         },
@@ -142,23 +176,28 @@ class _WordScreenState extends State<WordScreen> {
               if (title == 'Sentences') {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => SentencesScreen(widget.word),
+                    builder: (context) =>
+                        SentencesScreen(widget.wordobj, model),
                   ),
                 );
               } else if (title == 'In Videos') {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => VideoScreen(widget.word, youtubeList),
-                  ),
-                );
+                if (widget.model.youglishlimit < 29) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => VideoScreen(
+                          widget.wordobj['meta']['id'], youtubeList),
+                    ),
+                  );
+                }
               } else if (title == '+ Add to List') {
                 if (!fav) {
                   print('Added');
                   setState(() {
                     fav = true;
-                    model.myWords.add(widget.word);
+                    model.myWords.add(widget.wordobj);
+                    model.fetchMyWords();
                   });
-                  model.addFavWord(widget.word);
+                  model.addFavWord(widget.wordobj);
                 }
               }
             }),
@@ -190,12 +229,11 @@ class _WordScreenState extends State<WordScreen> {
       width: viewportWidth * 0.8,
       height: showalldefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25,
       child: ListView.builder(
-        itemCount: definitions.length,
+        itemCount: showalldefinitions ? definitions.length : 1,
         itemBuilder: (context, index) {
           return Column(
             children: <Widget>[
               ListTile(
-                // leading: Text((index + 1).toString()),
                 leading: Container(
                   height: 22,
                   width: 22,
@@ -299,7 +337,7 @@ class _WordScreenState extends State<WordScreen> {
                   ? ListTile(
                       leading: Icon(Icons.translate),
                       title: Text(
-                        definitions[index],
+                        defTransList[index],
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: viewportHeight * 0.02,

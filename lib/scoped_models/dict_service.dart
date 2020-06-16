@@ -16,21 +16,40 @@ class DictService extends ConnectedModel {
       if (response.statusCode == 200) {
         print('Dict search success.');
         final res = json.decode(response.body);
-        res.forEach((obj) {
-          if (obj is String) {
-            print(obj);
-          } else {
-            print(obj['meta']['id']);
-          }
-        });
+        // res.forEach((obj) {
+        //   if (obj is String) {
+        //     print(obj);
+        //   } else {
+        //     print(obj['meta']['id']);
+        //   }
+        // });
         return res;
       } else {
-        print('!!!1111111!');
+        print('Invalid status code : ${response.statusCode}');
         return null;
       }
     } catch (err) {
       print(err);
       return null;
     }
+  }
+
+  String parseSentence(String sentence) {
+    String _newString = '';
+    bool flag = false;
+    for (int i = 0; i < sentence.length; i++) {
+      if (sentence[i] == '{') {
+        flag = true;
+      } else if (sentence[i] == '}') {
+        flag = false;
+        i++;
+      }
+      if (flag) {
+        // print(sentence[i]);
+      } else {
+        _newString = _newString + sentence[i];
+      }
+    }
+    return _newString;
   }
 }

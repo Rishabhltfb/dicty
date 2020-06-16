@@ -63,7 +63,7 @@ class LangService extends ConnectedModel {
         print('translation success in lang');
         final Map<String, dynamic> res = json.decode(response.body);
 
-        // print(res);
+        // print(res['translations']);
         List translations = res['translations'];
         // translations.forEach((obj) {
         //   print(obj['translation']);
@@ -79,35 +79,35 @@ class LangService extends ConnectedModel {
     }
   }
 
-  Future<Null> tTSIBM(String text) async {
-    String username = 'apikey';
-    String password = ibmTTSKey;
-    String basicAuth =
-        'Basic ' + base64Encode(utf8.encode('$username:$password'));
-    final Map<String, dynamic> body = {'text': text};
+  // Future<Null> tTSIBM(String text) async {
+  //   String username = 'apikey';
+  //   String password = ibmTTSKey;
+  //   String basicAuth =
+  //       'Basic ' + base64Encode(utf8.encode('$username:$password'));
+  //   final Map<String, dynamic> body = {'text': text};
 
-    try {
-      final http.Response response = await http.post(
-          'https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/6cf5f697-4a9f-4f4c-be05-235f6f08c685/v1/synthesize',
-          body: json.encode(body),
-          headers: <String, String>{
-            'authorization': basicAuth,
-            'Content-Type': 'application/json',
-            'Accept': 'audio/wav'
-          });
+  //   try {
+  //     final http.Response response = await http.post(
+  //         'https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/6cf5f697-4a9f-4f4c-be05-235f6f08c685/v1/synthesize',
+  //         body: json.encode(body),
+  //         headers: <String, String>{
+  //           'authorization': basicAuth,
+  //           'Content-Type': 'application/json',
+  //           'Accept': 'audio/wav'
+  //         });
 
-      if (response.statusCode == 200) {
-        print('translation success in lang');
-        final File res = json.decode(response.body);
+  //     if (response.statusCode == 200) {
+  //       print('translation success in lang');
+  //       final File res = json.decode(response.body);
 
-        print(res);
-      } else {
-        print('Invalid status code : ${response.statusCode}');
-      }
-    } catch (err) {
-      print(err);
-    }
-  }
+  //       // print(res);
+  //     } else {
+  //       print('Invalid status code : ${response.statusCode}');
+  //     }
+  //   } catch (err) {
+  //     print(err);
+  //   }
+  // }
 
   FlutterTts flutterTts;
 

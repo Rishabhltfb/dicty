@@ -84,8 +84,8 @@ class UserModel extends ConnectedModel {
     return res;
   }
 
-  Future<bool> addFavWord(String word) async {
-    final Map<String, dynamic> addedWord = {'word': word};
+  Future<bool> addFavWord(Map wordobj) async {
+    final Map<String, dynamic> addedWord = {'wordobj': wordobj};
 
     try {
       final http.Response response = await http.post(
@@ -107,16 +107,16 @@ class UserModel extends ConnectedModel {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String nativelang = prefs.getString('native');
     String nLC = prefs.getString('nativeCode');
-    nativeLang = nativelang;
-    nativeLangCode = nLC;
-    if (nativelang != null && nativeLangCode != null) {
+    if (nativelang != null && nLC != null) {
+      nativeLang = nativelang;
+      nativeLangCode = nLC;
       return true;
     } else {
       return false;
     }
   }
 
-  Future<Null> fetchWords() async {
+  Future<Null> fetchMyWords() async {
     isLoading = true;
     notifyListeners();
     return await http
@@ -124,7 +124,7 @@ class UserModel extends ConnectedModel {
             'https://dicty-app.firebaseio.com/${authenticatedUser.uid}/words.json')
         .then<Null>((http.Response response) {
       if (response.statusCode == 200) {
-        final List<String> fetchedWordList = [];
+        final List<Map> fetchedWordList = [];
         final Map<String, dynamic> wordListData = json.decode(response.body);
         if (wordListData == null) {
           isLoading = false;
@@ -133,7 +133,7 @@ class UserModel extends ConnectedModel {
         }
 
         wordListData.forEach((String id, dynamic entryData) {
-          final String entry = entryData['word'];
+          final Map entry = entryData['wordobj'];
           fetchedWordList.add(entry);
           // print(entry);
         });

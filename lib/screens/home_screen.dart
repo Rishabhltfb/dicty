@@ -22,16 +22,31 @@ class _HomeScreenState extends State<HomeScreen> {
   bool typing = false;
   bool showResults = false;
   List<dynamic> dict_words = [];
-  @override
-  void initState() {
-    widget.model.fetchWords().then((_) {
-      mywords = widget.model.myWords;
-    });
-    super.initState();
-  }
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  int currTransindex;
+  List<Map> mywordObjs = [];
   List<String> mywords = [];
+  List<String> mywordsTrans = [];
+  @override
+  void initState() {
+    currTransindex = -1;
+    widget.model.fetchMyWords().then((_) {
+      mywordObjs = widget.model.myWords;
+      mywordObjs.forEach((wordObj) {
+        mywords.add(wordObj['meta']['id']);
+      });
+      if (mywords.isNotEmpty) {
+        widget.model.translateIBM(mywords).then((list) {
+          list.forEach((element) {
+            mywordsTrans.add(element['translation']);
+          });
+        });
+      }
+    });
+
+    super.initState();
+  }
 
   Widget searchWidget() {
     return Container(
@@ -139,7 +154,9 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.symmetric(horizontal: 5),
               physics: BouncingScrollPhysics(),
               itemBuilder: (BuildContext context, int index) {
-                var word = mywords[index];
+                var word = currTransindex == index
+                    ? mywordsTrans[index]
+                    : mywords[index];
                 return ListTile(
                   title: Text(
                     word,
@@ -150,7 +167,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => WordScreen(word),
+                        builder: (context) =>
+                            WordScreen(mywordObjs[index], model),
                       ),
                     );
                   },
@@ -165,9 +183,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Theme.of(context).primaryColor,
                           ),
                           onPressed: () {
-                            List wordList = [];
-                            wordList.add(word);
-                            model.translateIBM(wordList);
+                            setState(() {
+                              if (currTransindex != index) {
+                                currTransindex = index;
+                              } else {
+                                currTransindex = -1;
+                              }
+                            });
                           },
                         ),
                         IconButton(
@@ -315,7 +337,8 @@ class _HomeScreenState extends State<HomeScreen> {
               FocusScope.of(context).requestFocus(FocusNode());
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => WordScreen(list[index]),
+                  builder: (context) =>
+                      WordScreen(dict_words[index], widget.model),
                 ),
               );
             },

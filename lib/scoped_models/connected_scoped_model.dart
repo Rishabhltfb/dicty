@@ -12,9 +12,10 @@ class ConnectedModel extends Model {
   FirebaseUser authenticatedUser = null;
   bool isLoading = false;
   bool isUserAuthenticated = false;
+  int youglishlimit = 0;
   String nativeLang = '';
   String nativeLangCode = '';
-  List<String> myWords = [];
+  List<Map> myWords = [];
   List nativeLanguagesList = [];
   // Map<String, dynamic> azureLanguages;
 }

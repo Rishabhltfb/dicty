@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:async';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import './connected_scoped_model.dart';
 
@@ -25,5 +26,18 @@ class YoutubeService extends ConnectedModel {
       print(err);
       return null;
     }
+  }
+
+  void setYouglishLimit() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String limit = prefs.getString('limit');
+    int.parse('limit');
+  }
+
+  void updateLimit() async {
+    youglishlimit++;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String limit = youglishlimit.toString();
+    prefs.setString('limit', limit);
   }
 }
