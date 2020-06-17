@@ -31,7 +31,24 @@ class YoutubeService extends ConnectedModel {
   void setYouglishLimit() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String limit = prefs.getString('limit');
-    int.parse('limit');
+    String expiryTime = prefs.getString('expiryTime');
+
+    final DateTime now = DateTime.now();
+    if (expiryTime.isNotEmpty) {
+      final parsedExpiryTime = DateTime.parse(expiryTime);
+      if (parsedExpiryTime.isBefore(now)) {}
+    } else {
+      final DateTime expiryTime = now.add(Duration(days: 1));
+      prefs.setString('expiryTime', expiryTime.toIso8601String());
+    }
+    youglishlimit = int.parse(limit);
+  }
+
+  void resetExpiry() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String expiryTime = prefs.getString('expiryTime');
+
+    final DateTime now = DateTime.now();
   }
 
   void updateLimit() async {
@@ -39,5 +56,7 @@ class YoutubeService extends ConnectedModel {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String limit = youglishlimit.toString();
     prefs.setString('limit', limit);
+    final DateTime now = DateTime.now();
+    final DateTime expiryTime = now.add(Duration(days: 1));
   }
 }

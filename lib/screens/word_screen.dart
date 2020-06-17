@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
 import 'package:dictyapp/scoped_models/main_scoped_model.dart';
+import 'package:dictyapp/screens/giphy_screen.dart';
 import 'package:dictyapp/screens/sentences_screen.dart';
 import 'package:dictyapp/screens/video_screen.dart';
 import 'package:dictyapp/widgets/wordHead.dart';
@@ -95,7 +96,7 @@ class _WordScreenState extends State<WordScreen> {
                           ? _moreButton('Less Difinitions')
                           : _moreButton('More Difinitions'),
                       _button(title: 'Sentences', model: model),
-                      _button(title: 'Movie Texts'),
+                      _button(title: 'Giphy', model: model),
                       _button(title: 'In Videos'),
                       _button(title: '+ Add to List', model: model),
                     ],
@@ -183,9 +184,17 @@ class _WordScreenState extends State<WordScreen> {
               } else if (title == 'In Videos') {
                 if (widget.model.youglishlimit < 29) {
                   Navigator.of(context).push(
+                    // MaterialPageRoute(
+                    //   builder: (context) => VideoScreen(
+                    //     widget.wordobj['meta']['id'],
+                    //     youtubeList,
+                    //   ),
+                    // ),  actual navigator
                     MaterialPageRoute(
                       builder: (context) => VideoScreen(
-                          widget.wordobj['meta']['id'], youtubeList),
+                        widget.wordobj['meta']['id'],
+                        youtubeList,
+                      ),
                     ),
                   );
                 }
@@ -199,6 +208,13 @@ class _WordScreenState extends State<WordScreen> {
                   });
                   model.addFavWord(widget.wordobj);
                 }
+              } else if (title == 'Giphy') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        GiphyScreen(widget.wordobj['meta']['id'], model),
+                  ),
+                );
               }
             }),
       ),

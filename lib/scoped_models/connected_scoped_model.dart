@@ -8,6 +8,7 @@ class ConnectedModel extends Model {
   final ibmTTSKey = ApiKeys.ibmspeechkey;
   final dictKey = ApiKeys.meriamDictKey;
   final youtubeKey = ApiKeys.youglishKey;
+  final giphyKey = ApiKeys.giphyKey;
 
   FirebaseUser authenticatedUser = null;
   bool isLoading = false;

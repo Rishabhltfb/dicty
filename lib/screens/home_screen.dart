@@ -5,6 +5,7 @@ import 'package:dictyapp/screens/word_screen.dart';
 import 'package:dictyapp/widgets/dictyHead.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:speech_recognition/speech_recognition.dart';
 
 class HomeScreen extends StatefulWidget {
   final MainModel model;
@@ -28,8 +29,17 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map> mywordObjs = [];
   List<String> mywords = [];
   List<String> mywordsTrans = [];
+  // speech
+  SpeechRecognition _speech;
+  bool _speechRecognitionAvailable = false;
+  bool _isListening = false;
+
+  String transcription = '';
+  TextEditingController _textEditingController = TextEditingController();
+
   @override
   void initState() {
+    activateSpeechRecognizer(); // speech
     currTransindex = -1;
     widget.model.fetchMyWords().then((_) {
       mywordObjs = widget.model.myWords;
@@ -48,6 +58,68 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
+  void activateSpeechRecognizer() {
+    widget.model.requestPermission();
+
+    _speech = new SpeechRecognition();
+    _speech.setAvailabilityHandler(onSpeechAvailability);
+    _speech.setCurrentLocaleHandler(onCurrentLocale);
+    _speech.setRecognitionStartedHandler(onRecognitionStarted);
+    _speech.setRecognitionResultHandler(onRecognitionResult);
+    _speech.setRecognitionCompleteHandler(onRecognitionComplete);
+    _speech
+        .activate()
+        .then((res) => setState(() => _speechRecognitionAvailable = res));
+  }
+
+  void start() => _speech
+      .listen(locale: 'en_US')
+      .then((result) => print('Started listening => result $result'));
+
+  void cancel() =>
+      _speech.cancel().then((result) => setState(() => _isListening = result));
+
+  void stop() => _speech.stop().then((result) {
+        setState(() => _isListening = result);
+      });
+
+  void onSpeechAvailability(bool result) =>
+      setState(() => _speechRecognitionAvailable = result);
+
+  void onCurrentLocale(String locale) =>
+      setState(() => print("current locale: $locale"));
+
+  void onRecognitionStarted() => setState(() => _isListening = true);
+
+  void onRecognitionResult(String text) {
+    setState(() {
+      searchWord = text;
+    });
+  }
+
+  void onRecognitionComplete() {
+    widget.model.searchWordDict(searchWord).then((list) {
+      if (list != null && typing) {
+        setState(() {
+          dict_words = list;
+          typing = true;
+          hideButtons = true;
+          showResults = true;
+        });
+      }
+    });
+    _textEditingController.value = TextEditingValue(
+      text: searchWord,
+      selection: TextSelection.fromPosition(
+        TextPosition(offset: searchWord.length),
+      ),
+    );
+
+    setState(() {
+      _isListening = false;
+    });
+  }
+
   Widget searchWidget() {
     return Container(
       // color: Colors.yellow,
@@ -64,6 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Form(
         key: _formKey,
         child: TextFormField(
+          controller: _textEditingController,
           onChanged: (String value) {
             if (value != '') {
               widget.model.searchWordDict(value).then((list) {
@@ -260,6 +333,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
               } else if (title == 'Practice') {
                 Navigator.of(context).pushNamed('/practice');
+              } else if (title == 'Speak Instead' &&
+                  _speechRecognitionAvailable &&
+                  !_isListening) {
+                start();
               }
             }),
       ),
