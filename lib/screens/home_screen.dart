@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: TextFormField(
           controller: _textEditingController,
           onChanged: (String value) {
-            if (value != '') {
+            if (value.isNotEmpty) {
               widget.model.searchWordDict(value).then((list) {
                 if (list != null && typing) {
                   setState(() {
@@ -151,7 +151,13 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             } else {
               FocusScope.of(context).requestFocus(FocusNode());
-              _formKey.currentState.reset();
+              searchWord = '';
+              _textEditingController.value = TextEditingValue(
+                text: '',
+                selection: TextSelection.fromPosition(
+                  TextPosition(offset: searchWord.length),
+                ),
+              );
               setState(() {
                 dict_words = [];
                 hideButtons = false;
@@ -328,6 +334,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               if (title == 'My Words') {
                 setState(() {
+                  widget.model.fetchMyWords();
                   hideButtons = true;
                   showMyWords = true;
                 });

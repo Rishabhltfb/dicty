@@ -204,7 +204,7 @@ class _WordScreenState extends State<WordScreen> {
                   setState(() {
                     fav = true;
                     model.myWords.add(widget.wordobj);
-                    model.fetchMyWords();
+                    widget.model.fetchMyWords();
                   });
                   model.addFavWord(widget.wordobj);
                 }
