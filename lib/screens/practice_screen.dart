@@ -2,21 +2,50 @@ import 'dart:async';
 
 import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
+import 'package:dictyapp/scoped_models/main_scoped_model.dart';
 import 'package:dictyapp/widgets/dictyHead.dart';
 import 'package:flutter/material.dart';
 
 class PracticeScreen extends StatefulWidget {
+  final MainModel model;
+  PracticeScreen(this.model);
   @override
   _PracticeScreenState createState() => _PracticeScreenState();
 }
 
-class _PracticeScreenState extends State<PracticeScreen> {
+class _PracticeScreenState extends State<PracticeScreen>
+    with SingleTickerProviderStateMixin {
   var viewportHeight;
   var viewportWidth;
   var practiceWord = 'Psychology';
+  String practiceTrans = '';
   var correctWord = 'four';
   bool hintNeeded = false;
   bool correctAns = false;
+  bool showTrans = false;
+  AnimationController _animationController;
+  Animation<double> _animation;
+  AnimationStatus _animationStatus = AnimationStatus.dismissed;
+
+  @override
+  void initState() {
+    super.initState();
+    showTrans = false;
+    widget.model.translateIBM([practiceWord]).then((list) {
+      practiceTrans = list[0]['translation'];
+    });
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+    );
+    _animation = Tween<double>(end: 1, begin: 0).animate(_animationController)
+      ..addListener(() {
+        setState(() {});
+      })
+      ..addStatusListener((status) {
+        _animationStatus = status;
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,98 +163,120 @@ class _PracticeScreenState extends State<PracticeScreen> {
   }
 
   Widget _wordBox() {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          if (practiceWord == 'Psychology') {
-            practiceWord = 'Native Word';
+    String currWord;
+    if (showTrans) {
+      currWord = practiceTrans;
+    } else {
+      currWord = practiceWord;
+    }
+    return Transform(
+      alignment: FractionalOffset.center,
+      transform: Matrix4.identity()
+        ..setEntry(3, 2, 0.002)
+        ..rotateY(_animation.value >= 0.5
+            ? 3.14 * _animation.value + 3.14
+            : 3.14 * _animation.value),
+      child: GestureDetector(
+        onTap: () {
+          if (_animationStatus == AnimationStatus.dismissed) {
+            _animationController.forward();
           } else {
-            practiceWord = 'Psychology';
+            _animationController.reverse();
           }
-        });
-      },
-      child: Container(
-        height: viewportHeight * 0.6,
-        width: viewportWidth * 0.85,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(
-            Radius.circular(20),
+          setState(() {
+            showTrans = !showTrans;
+          });
+        },
+        child: Container(
+          height: viewportHeight * 0.6,
+          width: viewportWidth * 0.85,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(
+              Radius.circular(20),
+            ),
+            color: Theme.of(context).cardColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white,
+              )
+            ],
           ),
-          color: Theme.of(context).cardColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.white,
-            )
-          ],
-        ),
-        child: Column(
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                IconButton(
+          child: Column(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(
+                      MyFlutterApp.question,
+                      size: viewportHeight * 0.04,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        hintNeeded = true;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              Container(
+                height: viewportHeight * 0.41,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Text(
+                      currWord,
+                      style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontFamily: 'Krungthep',
+                          fontSize: viewportHeight * 0.045),
+                    ),
+                    hintNeeded
+                        ? Column(
+                            children: <Widget>[
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: <Widget>[
+                                  _optionButton('one'),
+                                  _optionButton('two'),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: <Widget>[
+                                  _optionButton('three'),
+                                  _optionButton('four'),
+                                ],
+                              ),
+                            ],
+                          )
+                        : Container(),
+                  ],
+                ),
+              ),
+              Divider(
+                color: Theme.of(context).primaryColor,
+              ),
+              Center(
+                child: IconButton(
                   icon: Icon(
-                    MyFlutterApp.question,
-                    size: viewportHeight * 0.04,
+                    MyFlutterApp.volume,
+                    size: viewportHeight * 0.052,
                     color: Theme.of(context).primaryColor,
                   ),
                   onPressed: () {
-                    setState(() {
-                      hintNeeded = true;
+                    widget.model.initializeTts();
+                    widget.model.ttsspeak(practiceWord).then((_) {
+                      // model.flutterTts.stop();
                     });
                   },
                 ),
-              ],
-            ),
-            Container(
-              height: viewportHeight * 0.41,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Text(
-                    practiceWord,
-                    style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontFamily: 'Krungthep',
-                        fontSize: viewportHeight * 0.045),
-                  ),
-                  hintNeeded
-                      ? Column(
-                          children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: <Widget>[
-                                _optionButton('one'),
-                                _optionButton('two'),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: <Widget>[
-                                _optionButton('three'),
-                                _optionButton('four'),
-                              ],
-                            ),
-                          ],
-                        )
-                      : Container(),
-                ],
               ),
-            ),
-            Divider(
-              color: Theme.of(context).primaryColor,
-            ),
-            Center(
-              child: IconButton(
-                icon: Icon(
-                  MyFlutterApp.volume,
-                  size: viewportHeight * 0.052,
-                  color: Theme.of(context).primaryColor,
-                ),
-                onPressed: () {},
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

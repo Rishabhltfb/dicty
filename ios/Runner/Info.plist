@@ -2,9 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>Privacy - Microphone Usage Description</key>
+	<key>NSMicrophoneUsageDescription</key>
 	<string>This application needs to access your microphone</string>
-	<key>Privacy- Speech Recognition Usage Description</key>
+	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>This application needs the speech recognition permission</string>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>

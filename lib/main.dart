@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
     return ScopedModel<MainModel>(
       model: _model,
       child: NotPaid(
-        dueDate: DateTime(2020, 6, 17),
+        dueDate: DateTime(2020, 6, 19),
         deadlineDays: 1,
         child: MaterialApp(
           theme: ThemeData(
@@ -68,7 +68,7 @@ class _MyAppState extends State<MyApp> {
             '/learnLang': (BuildContext context) => LearnLangScreen(),
             '/home': (BuildContext context) => HomeScreen(_model),
             '/settings': (BuildContext context) => SettingScreen(),
-            '/practice': (BuildContext context) => PracticeScreen(),
+            '/practice': (BuildContext context) => PracticeScreen(_model),
           },
         ),
       ),

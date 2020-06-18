@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
 import 'package:dictyapp/scoped_models/main_scoped_model.dart';
@@ -22,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool showMyWords = false;
   bool typing = false;
   bool showResults = false;
+  bool _isLoading = false;
   List<dynamic> dict_words = [];
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -244,6 +247,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Theme.of(context).primaryColor),
                   ),
                   onTap: () {
+                    setState(() {
+                      showMyWords = false;
+                      hideButtons = false;
+                    });
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) =>
@@ -315,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ? viewportWidth * 0.6
             : viewportWidth * 0.36,
         child: RaisedButton(
-            color: Colors.white,
+            color: _isListening ? Colors.blue : Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
             ),
@@ -324,7 +331,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 title,
                 style: TextStyle(
-                    color: Theme.of(context).primaryColor,
+                    color: _isListening
+                        ? Colors.white
+                        : Theme.of(context).primaryColor,
                     fontSize: title != 'Speak Instead'
                         ? viewportHeight * 0.03
                         : viewportHeight * 0.015,
@@ -334,7 +343,23 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               if (title == 'My Words') {
                 setState(() {
-                  widget.model.fetchMyWords();
+                  widget.model.fetchMyWords().then((value) {
+                    setState(() {
+                      mywordObjs = widget.model.myWords;
+                      mywords = [];
+                      mywordsTrans = [];
+                      mywordObjs.forEach((wordObj) {
+                        mywords.add(wordObj['meta']['id']);
+                      });
+                      if (mywords.isNotEmpty) {
+                        widget.model.translateIBM(mywords).then((list) {
+                          list.forEach((element) {
+                            mywordsTrans.add(element['translation']);
+                          });
+                        });
+                      }
+                    });
+                  });
                   hideButtons = true;
                   showMyWords = true;
                 });
@@ -357,46 +382,52 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return SafeArea(
       child: Scaffold(
-        body: GestureDetector(
-          onTap: () {
-            FocusScope.of(context).requestFocus(FocusNode());
-            if (searchWord == '' && !showMyWords) {
-              setState(() {
-                typing = false;
-                hideButtons = false;
-                showResults = false;
-              });
-            }
-          },
-          child: ScopedModelDescendant<MainModel>(
-            builder: (context, child, model) {
-              return SingleChildScrollView(
-                child: Column(
-                  children: <Widget>[
-                    navbarButton(),
-                    DictyLabel(viewportHeight, viewportWidth, ''),
-                    SizedBox(
-                      height: viewportHeight * 0.12,
-                    ),
-                    Container(
-                      height: viewportHeight * 0.05,
-                      width: viewportWidth * 0.6,
-                      child: searchWidget(),
-                    ),
-                    typing ? _button('Speak Instead') : Container(),
-                    showResults ? searchedWords() : Container(),
-                    SizedBox(
-                      height: viewportHeight * 0.05,
-                    ),
-                    showMyWords ? myWordsList(context, model) : Container(),
-                    hideButtons ? Container() : _button('My Words'),
-                    hideButtons ? Container() : _button('Practice'),
-                  ],
+        body: _isLoading
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : GestureDetector(
+                onTap: () {
+                  FocusScope.of(context).requestFocus(FocusNode());
+                  if (searchWord == '' && !showMyWords) {
+                    setState(() {
+                      typing = false;
+                      hideButtons = false;
+                      showResults = false;
+                    });
+                  }
+                },
+                child: ScopedModelDescendant<MainModel>(
+                  builder: (context, child, model) {
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: <Widget>[
+                          navbarButton(),
+                          DictyLabel(viewportHeight, viewportWidth, ''),
+                          SizedBox(
+                            height: viewportHeight * 0.12,
+                          ),
+                          Container(
+                            height: viewportHeight * 0.05,
+                            width: viewportWidth * 0.6,
+                            child: searchWidget(),
+                          ),
+                          typing ? _button('Speak Instead') : Container(),
+                          showResults ? searchedWords() : Container(),
+                          SizedBox(
+                            height: viewportHeight * 0.05,
+                          ),
+                          showMyWords
+                              ? myWordsList(context, model)
+                              : Container(),
+                          hideButtons ? Container() : _button('My Words'),
+                          hideButtons ? Container() : _button('Practice'),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ),
+              ),
       ),
     );
   }
@@ -419,12 +450,39 @@ class _HomeScreenState extends State<HomeScreen> {
           return GestureDetector(
             onTap: () {
               FocusScope.of(context).requestFocus(FocusNode());
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) =>
-                      WordScreen(dict_words[index], widget.model),
+              var wordobj;
+              if (dict_words[index] is String) {
+                widget.model.searchWordDict(dict_words[index]).then((list) {
+                  wordobj = list[0];
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => WordScreen(wordobj, widget.model),
+                    ),
+                  );
+                });
+              } else {
+                wordobj = dict_words[index];
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => WordScreen(wordobj, widget.model),
+                  ),
+                );
+              }
+
+              searchWord = '';
+              _textEditingController.value = TextEditingValue(
+                text: '',
+                selection: TextSelection.fromPosition(
+                  TextPosition(offset: searchWord.length),
                 ),
               );
+              Timer(Duration(seconds: 2), () {
+                setState(() {
+                  hideButtons = false;
+                  typing = false;
+                  showResults = false;
+                });
+              });
             },
             child: Center(
                 child: Padding(

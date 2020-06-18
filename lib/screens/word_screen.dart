@@ -30,7 +30,6 @@ class _WordScreenState extends State<WordScreen> {
   List defTransList = [];
   @override
   void initState() {
-    print(widget.wordobj);
     currDefTransindex = -1;
     _isLoading = true;
     super.initState();
@@ -89,12 +88,14 @@ class _WordScreenState extends State<WordScreen> {
                       navbarButton(),
                       WordHead(viewportHeight, viewportWidth,
                           widget.wordobj['meta']['id']),
-                      Container(),
                       _definitions(model),
                       SizedBox(height: 15),
                       showalldefinitions
                           ? _moreButton('Less Difinitions')
                           : _moreButton('More Difinitions'),
+                      SizedBox(
+                        height: viewportHeight * 0.04,
+                      ),
                       _button(title: 'Sentences', model: model),
                       _button(title: 'Giphy', model: model),
                       _button(title: 'In Videos'),
@@ -175,7 +176,7 @@ class _WordScreenState extends State<WordScreen> {
             ),
             onPressed: () {
               if (title == 'Sentences') {
-                Navigator.of(context).push(
+                Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
                     builder: (context) =>
                         SentencesScreen(widget.wordobj, model),
@@ -243,8 +244,9 @@ class _WordScreenState extends State<WordScreen> {
   Widget _definitions(MainModel model) {
     return Container(
       width: viewportWidth * 0.8,
-      height: showalldefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25,
+      // height: showalldefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25,
       child: ListView.builder(
+        shrinkWrap: true,
         itemCount: showalldefinitions ? definitions.length : 1,
         itemBuilder: (context, index) {
           return Column(

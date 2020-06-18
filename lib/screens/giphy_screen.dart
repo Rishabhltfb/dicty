@@ -53,47 +53,54 @@ class _GiphyScreenState extends State<GiphyScreen> {
                     height: viewportHeight * 0.03,
                   ),
                   Container(
-                    height: viewportHeight * 0.8,
-                    width: viewportWidth * 0.9,
-                    color: Colors.white,
-                    child: ListView.separated(
-                        itemBuilder: (context, index) {
-                          return Container(
-                            height: index == gifs.length - 1
-                                ? double.parse(gifs[index]['height']) + 100
-                                : double.parse(gifs[index]['height']),
-                            width: double.parse(gifs[index]['width']),
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => Preview(gifs[index]),
-                                  ),
-                                );
-                              },
-                              child: Hero(
-                                tag: gifs[index]['url'],
-                                child: Center(
-                                  child: Image.network(
-                                    gifs[index]['url'],
-                                    height: double.parse(gifs[index]['height']),
-                                    width: double.parse(gifs[index]['width']),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                        separatorBuilder: (context, index) {
-                          return Divider(
-                            color: Theme.of(context).primaryColor,
-                          );
-                        },
-                        itemCount: gifs.length),
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      children: <Widget>[
+                        createGiphy(0),
+                        createGiphy(1),
+                        createGiphy(2),
+                        createGiphy(3),
+                        createGiphy(4),
+                        createGiphy(5),
+                        createGiphy(6),
+                        createGiphy(7),
+                        createGiphy(8),
+                        createGiphy(9),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
+    );
+  }
+
+  Widget createGiphy(int index) {
+    return Container(
+      height: index == gifs.length - 1
+          ? double.parse(gifs[index]['height']) + 100
+          : double.parse(gifs[index]['height']),
+      width: double.parse(gifs[index]['width']),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => Preview(gifs[index]),
+            ),
+          );
+        },
+        child: Hero(
+          tag: gifs[index]['url'],
+          child: Center(
+            child: Image.network(
+              gifs[index]['url'],
+              height: double.parse(gifs[index]['height']),
+              width: double.parse(gifs[index]['width']),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
