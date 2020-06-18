@@ -97,7 +97,7 @@ class _WordScreenState extends State<WordScreen> {
                         height: viewportHeight * 0.04,
                       ),
                       _button(title: 'Sentences', model: model),
-                      _button(title: 'Giphy', model: model),
+                      _button(title: 'In Gifs', model: model),
                       _button(title: 'In Videos'),
                       _button(title: '+ Add to List', model: model),
                     ],
@@ -207,11 +207,10 @@ class _WordScreenState extends State<WordScreen> {
                   });
                   model.addFavWord(widget.wordobj);
                 }
-              } else if (title == 'Giphy') {
+              } else if (title == 'In Gifs') {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) =>
-                        GiphyScreen(widget.wordobj['meta']['id'], model),
+                    builder: (context) => GiphyScreen(widget.wordobj, model),
                   ),
                 );
               }

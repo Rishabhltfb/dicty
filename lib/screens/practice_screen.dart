@@ -7,6 +7,7 @@ import 'package:dictyapp/helpers/practice.dart';
 import 'package:dictyapp/scoped_models/main_scoped_model.dart';
 import 'package:dictyapp/widgets/dictyHead.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tindercard/flutter_tindercard.dart';
 
 class PracticeScreen extends StatefulWidget {
   final MainModel model;
@@ -16,7 +17,7 @@ class PracticeScreen extends StatefulWidget {
 }
 
 class _PracticeScreenState extends State<PracticeScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   var viewportHeight;
   var viewportWidth;
   var practiceWord = 'Psychology';
@@ -80,12 +81,26 @@ class _PracticeScreenState extends State<PracticeScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
-                    _button('Movie Texts'),
+                    _button('Definitions'),
                     _button('Sentences'),
                   ],
                 ),
               ),
-              _wordBox(),
+              Container(
+                height: viewportHeight * 0.6,
+                child: TinderSwapCard(
+                  orientation: AmassOrientation.TOP,
+                  totalNum: 50,
+                  stackNum: 2,
+                  maxHeight: viewportHeight * 0.65,
+                  maxWidth: viewportWidth * 0.85,
+                  minHeight: viewportHeight * 0.6,
+                  minWidth: viewportWidth * 0.8,
+                  cardBuilder: (context, index) {
+                    return Card(child: _wordBox());
+                  },
+                ),
+              ),
             ],
           ),
         ),
