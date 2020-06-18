@@ -1,5 +1,6 @@
 import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
+import 'package:dictyapp/scoped_models/main_scoped_model.dart';
 import 'package:dictyapp/widgets/wordHead.dart';
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -7,8 +8,9 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 class VideoScreen extends StatefulWidget {
   final word;
   final List youtubeList;
+  final MainModel model;
 
-  VideoScreen(this.word, this.youtubeList);
+  VideoScreen(this.word, this.youtubeList, this.model);
   @override
   _VideoScreenState createState() => _VideoScreenState();
 }
@@ -51,7 +53,7 @@ class _VideoScreenState extends State<VideoScreen> {
               height: viewportHeight * 0.03,
             ),
             navbarButton(),
-            WordHead(viewportHeight, viewportWidth, widget.word),
+            WordHead(viewportHeight, viewportWidth, widget.word, widget.model),
             Container(),
             showDefinitions ? _definitions() : Container(),
             SizedBox(height: 15),

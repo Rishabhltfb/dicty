@@ -42,7 +42,11 @@ class DictService extends ConnectedModel {
         flag = true;
       } else if (sentence[i] == '}') {
         flag = false;
-        i++;
+        if (i != sentence.length - 1) {
+          i++;
+        } else {
+          return _newString;
+        }
       }
       if (flag) {
         // print(sentence[i]);

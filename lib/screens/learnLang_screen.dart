@@ -19,7 +19,7 @@ class _LearnLangScreenState extends State<LearnLangScreen> {
       ),
       onPressed: () {},
       child: Text(
-        'English',
+        '🇺🇸   English',
         style: TextStyle(color: Theme.of(context).primaryColor),
       ),
     );

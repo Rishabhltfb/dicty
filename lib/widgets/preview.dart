@@ -1,3 +1,4 @@
+import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:flutter/material.dart';
 
 class Preview extends StatelessWidget {
@@ -6,19 +7,11 @@ class Preview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          color: Colors.white,
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ),
-      body: Hero(
+    return Container(
+      height: getDeviceHeight(context),
+      width: getDeviceWidth(context),
+      color: Colors.black.withOpacity(0.7),
+      child: Hero(
         tag: gif['url'],
         child: Center(
           child: Image.network(

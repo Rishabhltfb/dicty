@@ -87,7 +87,7 @@ class _WordScreenState extends State<WordScreen> {
                       ),
                       navbarButton(),
                       WordHead(viewportHeight, viewportWidth,
-                          widget.wordobj['meta']['id']),
+                          widget.wordobj['meta']['id'], model),
                       _definitions(model),
                       SizedBox(height: 15),
                       showalldefinitions
@@ -193,9 +193,7 @@ class _WordScreenState extends State<WordScreen> {
                     // ),  actual navigator
                     MaterialPageRoute(
                       builder: (context) => VideoScreen(
-                        widget.wordobj['meta']['id'],
-                        youtubeList,
-                      ),
+                          widget.wordobj['meta']['id'], youtubeList, model),
                     ),
                   );
                 }
@@ -272,11 +270,22 @@ class _WordScreenState extends State<WordScreen> {
                     ),
                   ),
                 ),
-                title: Text(
-                  definitions[index],
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: viewportHeight * 0.02,
+                title: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: viewportHeight * 0.02,
+                    ),
+                    children: <TextSpan>[
+                      TextSpan(text: definitions[index]),
+                      TextSpan(
+                        text: '. (Noun)',
+                        style: TextStyle(
+                            fontSize: viewportHeight * 0.018,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ),
                 subtitle: Padding(

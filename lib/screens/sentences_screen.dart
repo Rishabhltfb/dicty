@@ -74,8 +74,8 @@ class _SentencesScreenState extends State<SentencesScreen> {
               height: viewportHeight * 0.03,
             ),
             navbarButton(),
-            WordHead(
-                viewportHeight, viewportWidth, widget.wordobj['meta']['id']),
+            WordHead(viewportHeight, viewportWidth,
+                widget.wordobj['meta']['id'], widget.model),
             Container(),
             showDefinitions ? _definitions('Definitions') : Container(),
             SizedBox(height: 15),
@@ -197,10 +197,11 @@ class _SentencesScreenState extends State<SentencesScreen> {
     }
     return Container(
       width: viewportWidth * 0.8,
-      height: title == 'Sentences'
-          ? viewportHeight * 0.6
-          : (showAllDefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25),
+      // height: title == 'Sentences'
+      //     ? viewportHeight * 0.6
+      //     : (showAllDefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25),
       child: ListView.builder(
+        shrinkWrap: true,
         itemCount: title != 'Sentences'
             ? (showAllDefinitions ? definitions.length : 1)
             : definitions.length,
@@ -229,11 +230,24 @@ class _SentencesScreenState extends State<SentencesScreen> {
                     ),
                   ),
                 ),
-                title: Text(
-                  definitions[index],
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: viewportHeight * 0.02,
+                title: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: viewportHeight * 0.02,
+                    ),
+                    children: <TextSpan>[
+                      TextSpan(text: definitions[index]),
+                      title != 'Sentences'
+                          ? TextSpan(
+                              text: '. (Noun)',
+                              style: TextStyle(
+                                  fontSize: viewportHeight * 0.018,
+                                  fontStyle: FontStyle.italic,
+                                  fontWeight: FontWeight.bold),
+                            )
+                          : TextSpan(text: '.'),
+                    ],
                   ),
                 ),
                 subtitle: Padding(

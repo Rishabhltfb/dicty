@@ -10,7 +10,7 @@ class GiphyService extends ConnectedModel {
     String key = giphyKey;
     try {
       final http.Response response = await http.get(
-          'https://api.giphy.com/v1/gifs/search?api_key=${key}&q=${word}&limit=10&offset=0&rating=G&lang=en',
+          'https://api.giphy.com/v1/gifs/search?api_key=${key}&q=${word}&limit=20&offset=0&rating=G&lang=en',
           headers: <String, String>{'Content-Type': 'application/json'});
       print(response.statusCode);
       if (response.statusCode == 200) {

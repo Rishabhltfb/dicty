@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'dart:math';
 import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
+import 'package:dictyapp/helpers/practice.dart';
 import 'package:dictyapp/scoped_models/main_scoped_model.dart';
 import 'package:dictyapp/widgets/dictyHead.dart';
 import 'package:flutter/material.dart';
@@ -26,11 +28,13 @@ class _PracticeScreenState extends State<PracticeScreen>
   AnimationController _animationController;
   Animation<double> _animation;
   AnimationStatus _animationStatus = AnimationStatus.dismissed;
+  List<String> options = [];
 
   @override
   void initState() {
     super.initState();
     showTrans = false;
+
     widget.model.translateIBM([practiceWord]).then((list) {
       practiceTrans = list[0]['translation'];
     });
@@ -45,6 +49,19 @@ class _PracticeScreenState extends State<PracticeScreen>
       ..addStatusListener((status) {
         _animationStatus = status;
       });
+  }
+
+  void setOptions() {
+    List list = [];
+    int option1 = new Random().nextInt(practiceOptions.length);
+    int option2 = new Random().nextInt(practiceOptions.length);
+    int option3 = new Random().nextInt(practiceOptions.length);
+    int option4 = new Random().nextInt(practiceOptions.length);
+    list.add(practiceOptions[option1]);
+    list.add(practiceOptions[option2]);
+    list.add(practiceOptions[option3]);
+    list.add(practiceOptions[option4]);
+    correctWord = practiceOptions[option1];
   }
 
   @override
@@ -132,7 +149,7 @@ class _PracticeScreenState extends State<PracticeScreen>
                 });
                 Timer(Duration(seconds: 2), () {
                   setState(() {
-                    practiceWord = 'Native Word';
+                    // practiceWord = 'Native Word';
                     hintNeeded = false;
                     correctAns = false;
                   });
