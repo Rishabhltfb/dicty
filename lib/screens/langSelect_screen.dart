@@ -1,4 +1,5 @@
 import 'package:dictyapp/helpers/dimensions.dart';
+import 'package:dictyapp/helpers/flags.dart';
 import 'package:dictyapp/scoped_models/main_scoped_model.dart';
 import 'package:dictyapp/widgets/dictyHead.dart';
 import 'package:flutter/material.dart';
@@ -14,40 +15,57 @@ class _LangSelectScreenState extends State<LangSelectScreen> {
   var viewportWidth;
   var lang = 'Afrikaans';
   List<String> nativeLanguages = [];
+  String flag = '🇿🇦';
+  // List<String> languages = [];
 
-  Widget _dropdown() {
+  String findFlag(String langName) {
+    return flags[langName] != null ? flags[langName] : '🇮🇳';
+  }
+
+  Widget _dropdown(MainModel model) {
     return FlatButton(
       color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(13),
       ),
       onPressed: () {},
-      child: Container(
-        width: viewportWidth * 0.3,
-        height: viewportHeight * 0.08,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: <Widget>[
-            new DropdownButton<String>(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Text(
+            flag,
+            textScaleFactor: 1.5,
+          ),
+          Container(
+            width: viewportWidth * 0.3,
+            height: viewportHeight * 0.06,
+            child: new DropdownButton<String>(
+              iconEnabledColor: Theme.of(context).primaryColor,
               hint: Text(
                 lang,
-                overflow: TextOverflow.clip,
                 style: TextStyle(color: Theme.of(context).primaryColor),
               ),
+              isExpanded: true,
               items: nativeLanguages.map((String value) {
                 return new DropdownMenuItem<String>(
                   value: value,
-                  child: new Text(value),
+                  child: new Text(findFlag(value) + '  ' + value),
                 );
               }).toList(),
               onChanged: (value) {
                 setState(() {
+                  flag = findFlag(value);
+                  var elem = model.nativeLanguagesList.firstWhere((obj) {
+                    return obj['name'] == value;
+                  });
+                  String langCode = elem['language'];
                   lang = value;
+                  model.addNativeLang(lang, langCode);
                 });
               },
-            )
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -117,7 +135,7 @@ class _LangSelectScreenState extends State<LangSelectScreen> {
                   ),
                   Container(
                     width: viewportWidth * 0.5,
-                    child: _dropdown(),
+                    child: _dropdown(model),
                   ),
                   SizedBox(height: viewportHeight * 0.35),
                   Container(

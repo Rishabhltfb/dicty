@@ -167,7 +167,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       ),
                     ),
                   ),
-                  _button('English', model),
+                  _button('🇺🇸  English', model),
                   _button('Notifications On', model),
                   _button('Logout', model),
                   Text(email),

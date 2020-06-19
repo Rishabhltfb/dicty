@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
     return ScopedModel<MainModel>(
       model: _model,
       child: NotPaid(
-        dueDate: DateTime(2020, 6, 19),
+        dueDate: DateTime(2020, 6, 21),
         deadlineDays: 1,
         child: MaterialApp(
           theme: ThemeData(
