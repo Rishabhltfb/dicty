@@ -82,14 +82,18 @@ class _AuthScreenState extends State<AuthScreen> {
           borderRadius: BorderRadius.circular(13),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Image(image: AssetImage('assets/images/google.jpeg'), height: 20.0),
-            Text(
-              'Sign In with Google',
-              style: TextStyle(
-                  color: Colors.black.withOpacity(0.55),
-                  fontSize: viewportHeight * 0.025),
+            Padding(
+              padding: const EdgeInsets.only(left: 10.0),
+              child: Text(
+                'Sign In with Google',
+                style: TextStyle(
+                    color: Colors.black.withOpacity(0.55),
+                    fontSize: viewportHeight * 0.025),
+              ),
             ),
           ],
         ),
@@ -136,10 +140,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                 ),
                 SizedBox(height: viewportHeight * 0.3),
-                Container(
-                  width: viewportWidth * 0.6,
-                  child: _signInButton(model, context),
-                ),
+                _signInButton(model, context),
                 _signUpButton('Sign Up with Google',
                     'assets/images/google.jpeg', 'signup', model),
               ],

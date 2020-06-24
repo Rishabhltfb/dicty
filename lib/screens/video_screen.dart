@@ -6,11 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoScreen extends StatefulWidget {
-  final word;
-  final List youtubeList;
+  final wordobj;
   final MainModel model;
 
-  VideoScreen(this.word, this.youtubeList, this.model);
+  VideoScreen(this.wordobj, this.model);
   @override
   _VideoScreenState createState() => _VideoScreenState();
 }
@@ -20,25 +19,78 @@ class _VideoScreenState extends State<VideoScreen> {
   var viewportWidth;
   bool showDefinitions = false;
   bool showAllDefinitions = false;
+  bool showDefTrans = false;
+  bool _isLoading = false;
+  bool _isPlaying = true;
   var id = '';
   var startTime = '';
-  List<String> definitions = [
-    'a male who has the same parents as another or one parent in common with another. (noun)'
-  ];
+  int currVidIndex;
+  int currDefTransIndex;
+
+  List definitionsList = [];
+  List defTransList = [];
+
+  List youtubeList = [];
   YoutubePlayerController _controller;
 
   @override
   void initState() {
     super.initState();
-    id = widget.youtubeList[0]['vid'];
-    startTime = widget.youtubeList[0]['start'];
-    _controller = YoutubePlayerController(
-      initialVideoId: id,
-      flags: YoutubePlayerFlags(
-        mute: false,
-        autoPlay: true,
-      ),
-    );
+    currVidIndex = 0;
+    _isLoading = true;
+    currDefTransIndex = -1;
+
+    definitionsList = widget.wordobj['shortdef'];
+    if (definitionsList.isNotEmpty) {
+      widget.model.translateIBM(definitionsList).then((transList) {
+        var tempList = [];
+        transList.forEach((element) {
+          tempList.add(element['translation']);
+        });
+        defTransList = tempList;
+      });
+    }
+
+    if (youtubeList.length == 0 && widget.model.youglishlimit < 20) {
+      print('Youglish limit is : ${widget.model.youglishlimit}');
+      widget.model.searchYoutube(widget.wordobj['meta']['id']).then((value) {
+        youtubeList = value;
+        id = youtubeList[0]['vid'];
+        startTime = youtubeList[0]['start'];
+        _controller = YoutubePlayerController(
+          initialVideoId: id,
+          flags: YoutubePlayerFlags(
+            mute: false,
+            autoPlay: true,
+          ),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+  }
+
+  void nextVid() {
+    setState(() {
+      if (currVidIndex < youtubeList.length - 1) {
+        currVidIndex = currVidIndex + 1;
+        id = youtubeList[currVidIndex]['vid'];
+        startTime = youtubeList[currVidIndex]['start'];
+        _controller.load(id, startAt: int.parse(startTime));
+      }
+    });
+  }
+
+  void prevVid() {
+    setState(() {
+      if (currVidIndex > 0) {
+        currVidIndex = currVidIndex - 1;
+        id = youtubeList[currVidIndex]['vid'];
+        startTime = youtubeList[currVidIndex]['start'];
+        _controller.load(id, startAt: int.parse(startTime));
+      }
+    });
   }
 
   @override
@@ -47,45 +99,70 @@ class _VideoScreenState extends State<VideoScreen> {
     viewportWidth = getViewportWidth(context);
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            SizedBox(
-              height: viewportHeight * 0.03,
-            ),
-            navbarButton(),
-            WordHead(viewportHeight, viewportWidth, widget.word, widget.model),
-            Container(),
-            showDefinitions ? _definitions() : Container(),
-            SizedBox(height: 15),
-            showAllDefinitions
-                ? Container()
-                : showDefinitions
-                    ? _definitionButton('More Definitions')
-                    : _definitionButton('See Definitions'),
-            SizedBox(height: 15),
-            showDefinitions
-                ? _definitionButton('Close Definitions')
-                : Container(),
-            _button('In Videos'),
-            SizedBox(height: viewportHeight * 0.05),
-            Container(
-              height: viewportHeight * 0.3,
-              width: viewportWidth,
-              // child: Image.asset(
-              //   'assets/images/youtube.png',
-              //   fit: BoxFit.cover,
-              // ),
-              child: YoutubePlayer(
-                controller: _controller,
-                showVideoProgressIndicator: true,
-                onReady: () {
-                  _controller.seekTo(Duration(seconds: int.parse(startTime)));
-                  print('Player is ready.');
-                },
+        child: _isLoading
+            ? Container(
+                height: viewportHeight,
+                width: viewportWidth,
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            : Column(
+                children: <Widget>[
+                  SizedBox(
+                    height: viewportHeight * 0.03,
+                  ),
+                  navbarButton(),
+                  WordHead(viewportHeight, viewportWidth,
+                      widget.wordobj['meta']['id'], widget.model),
+                  Container(),
+                  showDefinitions ? _definitions('Definitions') : Container(),
+                  SizedBox(height: 15),
+                  showAllDefinitions
+                      ? Container()
+                      : showDefinitions
+                          ? _definitionButton('More Definitions')
+                          : _definitionButton('See Definitions'),
+                  SizedBox(height: 15),
+                  showDefinitions
+                      ? _definitionButton('Close Definitions')
+                      : Container(),
+                  _button('In Videos'),
+                  SizedBox(height: viewportHeight * 0.05),
+                  Container(
+                    height: viewportHeight * 0.3,
+                    width: viewportWidth,
+                    child: YoutubePlayer(
+                      controller: _controller,
+                      showVideoProgressIndicator: true,
+                      onReady: () {
+                        _controller
+                            .seekTo(Duration(seconds: int.parse(startTime)));
+                        print('Player is ready.');
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    height: viewportHeight * 0.05,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      currVidIndex != 0
+                          ? _playButton('previous')
+                          : SizedBox(
+                              width: viewportHeight * 0.1,
+                            ),
+                      _isPlaying ? _playButton('pause') : _playButton('play'),
+                      currVidIndex != youtubeList.length - 1
+                          ? _playButton('next')
+                          : SizedBox(
+                              width: viewportHeight * 0.1,
+                            ),
+                    ],
+                  )
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -114,19 +191,8 @@ class _VideoScreenState extends State<VideoScreen> {
             } else if (title == 'Close Definitions') {
               showDefinitions = false;
               showAllDefinitions = false;
-              var firstDefinition = definitions[0];
-              List<String> list = [];
-              list.add(firstDefinition);
-              definitions = list;
             } else {
               showAllDefinitions = true;
-
-              definitions.add(
-                  'a male who has the same parents as another or one parent in common with another. (noun)');
-              definitions.add(
-                  'a male who has the same parents as another or one parent in common with another. (noun)');
-              definitions.add(
-                  'a male who has the same parents as another or one parent in common with another. (noun)');
             }
           });
         },
@@ -171,6 +237,63 @@ class _VideoScreenState extends State<VideoScreen> {
     );
   }
 
+  Widget _playButton(String title) {
+    IconData iconData;
+    if (title == 'previous') {
+      iconData = MyFlutterApp.step_backward;
+    } else if (title == 'play') {
+      iconData = Icons.play_arrow;
+    } else if (title == 'pause') {
+      iconData = Icons.pause;
+    } else {
+      iconData = MyFlutterApp.step_forward;
+    }
+    return Container(
+      height: viewportHeight * 0.1,
+      width: viewportHeight * 0.1,
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white,
+          ),
+        ],
+        borderRadius: BorderRadius.all(
+          Radius.circular(100),
+        ),
+      ),
+      child: IconButton(
+        icon: Icon(
+          iconData,
+          size: viewportHeight * 0.06,
+          color: Theme.of(context).primaryColor,
+        ),
+        onPressed: () {
+          if (title == 'previous') {
+            prevVid();
+            setState(() {
+              _isPlaying = true;
+            });
+          } else if (title == 'play') {
+            setState(() {
+              _isPlaying = true;
+            });
+            _controller.play();
+          } else if (title == 'pause') {
+            setState(() {
+              _isPlaying = false;
+            });
+            _controller.pause();
+          } else {
+            nextVid();
+            setState(() {
+              _isPlaying = true;
+            });
+          }
+        },
+      ),
+    );
+  }
+
   Widget navbarButton() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -190,91 +313,151 @@ class _VideoScreenState extends State<VideoScreen> {
     );
   }
 
-  Widget _definitions() {
+  Widget _definitions(String title) {
+    var definitions;
+    var transList;
+    definitions = definitionsList;
+    transList = defTransList;
+
     return Container(
       width: viewportWidth * 0.8,
-      height: showAllDefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25,
+      // height: title == 'Sentences'
+      //     ? viewportHeight * 0.6
+      //     : (showAllDefinitions ? viewportHeight * 0.6 : viewportHeight * 0.25),
       child: ListView.builder(
-        itemCount: definitions.length,
+        shrinkWrap: true,
+        itemCount: (showAllDefinitions ? definitions.length : 1),
         itemBuilder: (context, index) {
-          return ListTile(
-            leading: Container(
-              height: 22,
-              width: 22,
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.white,
+          return Column(
+            children: <Widget>[
+              ListTile(
+                // leading: Text((index + 1).toString()),
+                leading: Container(
+                  height: 22,
+                  width: 22,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white,
+                      ),
+                    ],
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(23),
+                    ),
                   ),
-                ],
-                borderRadius: BorderRadius.all(
-                  Radius.circular(23),
+                  child: Center(
+                    child: Text(
+                      (index + 1).toString(),
+                      style: TextStyle(color: Theme.of(context).primaryColor),
+                    ),
+                  ),
+                ),
+                title: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: viewportHeight * 0.02,
+                    ),
+                    children: <TextSpan>[
+                      TextSpan(text: definitions[index]),
+                      title != 'Sentences'
+                          ? TextSpan(
+                              text: '. (Noun)',
+                              style: TextStyle(
+                                  fontSize: viewportHeight * 0.018,
+                                  fontStyle: FontStyle.italic,
+                                  fontWeight: FontWeight.bold),
+                            )
+                          : TextSpan(text: '.'),
+                    ],
+                  ),
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: ((currDefTransIndex == index
+                                  ? Colors.blue
+                                  : Colors.white)),
+                            ),
+                          ],
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(13),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 2),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (currDefTransIndex != index) {
+                                  currDefTransIndex = index;
+                                } else {
+                                  currDefTransIndex = -1;
+                                }
+                                showDefTrans = !showDefTrans;
+                              });
+                            },
+                            child: Icon(
+                              Icons.translate,
+                              size: viewportHeight * 0.03,
+                              color: ((currDefTransIndex == index
+                                  ? Colors.white
+                                  : Theme.of(context).primaryColor)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white,
+                            ),
+                          ],
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(13),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 2),
+                          child: GestureDetector(
+                            onTap: () {
+                              widget.model.initializeTts();
+                              widget.model.ttsspeak(definitions[index]);
+                            },
+                            child: Icon(
+                              MyFlutterApp.volume,
+                              size: viewportHeight * 0.03,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              child: Center(
-                child: Text(
-                  (index + 1).toString(),
-                  style: TextStyle(color: Theme.of(context).primaryColor),
-                ),
-              ),
-            ),
-            title: Text(
-              definitions[index],
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: viewportHeight * 0.02,
-              ),
-            ),
-            subtitle: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
-              child: Row(
-                children: <Widget>[
-                  Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
+              (currDefTransIndex == index
+                  ? ListTile(
+                      leading: Icon(Icons.translate),
+                      title: Text(
+                        transList[index],
+                        style: TextStyle(
                           color: Colors.white,
+                          fontSize: viewportHeight * 0.02,
                         ),
-                      ],
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(13),
                       ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 2),
-                      child: Icon(
-                        Icons.translate,
-                        size: viewportHeight * 0.03,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white,
-                        ),
-                      ],
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(13),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 2),
-                      child: Icon(
-                        MyFlutterApp.volume,
-                        size: viewportHeight * 0.03,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                    )
+                  : Container()),
+            ],
           );
         },
       ),

@@ -34,9 +34,26 @@ class _SentencesScreenState extends State<SentencesScreen> {
     currSenTransIndex = -1;
 
     definitionsList = widget.wordobj['shortdef'];
-    widget.wordobj['def'][0]['sseq'][0][0][1]['dt'][1][1].forEach((obj) {
-      sentences.add(widget.model.parseSentence(obj['t']));
-    });
+
+    if (widget.wordobj['def'][0]['sseq'][0][0][1]['dt'] != null) {
+      if (widget.wordobj['def'][0]['sseq'][0][0][1]['dt'][1][1] is String) {
+        widget.wordobj['def'][0]['sseq'][0][0][1]['dt'][2][1].forEach((obj) {
+          sentences.add(widget.model.parseSentence(obj['t']));
+        });
+      } else {
+        widget.wordobj['def'][0]['sseq'][0][0][1]['dt'][1][1].forEach((obj) {
+          sentences.add(widget.model.parseSentence(obj['t']));
+        });
+      }
+    } else {
+      widget.wordobj['def'][0]['sseq'][0][1][1]['dt'][1][1].forEach((obj) {
+        sentences.add(widget.model.parseSentence(obj['t']));
+      });
+    }
+
+    // widget.wordobj['def'][0]['sseq'][0][0][1]['dt'][1][1].forEach((obj) {
+    //   sentences.add(widget.model.parseSentence(obj['t']));
+    // });
 
     setTransList();
   }

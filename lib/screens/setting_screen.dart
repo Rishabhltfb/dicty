@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:dictyapp/helpers/flags.dart';
 import 'package:dictyapp/scoped_models/main_scoped_model.dart';
@@ -8,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class SettingScreen extends StatefulWidget {
+  final MainModel model;
+  SettingScreen(this.model);
   @override
   _SettingScreenState createState() => _SettingScreenState();
 }
@@ -17,8 +17,14 @@ class _SettingScreenState extends State<SettingScreen> {
   var viewportWidth;
   var lang = '';
   var email = 'avishay89051@gmail.com';
-  String flag = '🇮🇳';
+  String flag = '';
   List<String> languages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    flag = findFlag(widget.model.nativeLang);
+  }
 
   String findFlag(String langName) {
     return flags[langName] != null ? flags[langName] : '🇮🇳';
@@ -46,11 +52,9 @@ class _SettingScreenState extends State<SettingScreen> {
             ),
             onPressed: () {
               if (title == 'Logout') {
+                model.signOut();
                 Navigator.of(context).pushNamedAndRemoveUntil(
                     '/', (Route<dynamic> route) => false);
-                Timer(Duration(microseconds: 500), () {
-                  model.signOut();
-                });
               }
             }),
       ),
@@ -117,7 +121,7 @@ class _SettingScreenState extends State<SettingScreen> {
             model.nativeLanguagesList.forEach((obj) {
               languages.add(obj['name']);
             });
-            email = model.authenticatedUser.email;
+            email = model.email;
             return SingleChildScrollView(
               child: Column(
                 children: <Widget>[

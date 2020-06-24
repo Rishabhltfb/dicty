@@ -24,7 +24,6 @@ class _WordScreenState extends State<WordScreen> {
   bool showalldefinitions = false;
   bool fav = false;
   bool _isLoading = false;
-  List youtubeList = [];
   int currDefTransindex;
   List definitions = [];
   List defTransList = [];
@@ -43,11 +42,6 @@ class _WordScreenState extends State<WordScreen> {
       });
       fav = tempList.contains(widget.wordobj['meta']['id']);
     }
-    // if (youtubeList.length == 0 && widget.model.youglishlimit < 29) {
-    //   widget.model.searchYoutube(widget.wordobj['meta']['id']).then((value) {
-    //     youtubeList = value;
-    //   });
-    // }
     if (definitions.length == 0) {
       definitions = widget.wordobj['shortdef'];
     }
@@ -110,8 +104,8 @@ class _WordScreenState extends State<WordScreen> {
 
   Widget _moreButton(String title) {
     return Container(
-      width: viewportWidth * 0.4,
-      height: viewportHeight * 0.045,
+      width: viewportWidth * 0.45,
+      height: viewportHeight * 0.05,
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
@@ -123,7 +117,7 @@ class _WordScreenState extends State<WordScreen> {
         ),
       ),
       child: OutlineButton(
-        padding: EdgeInsets.all(0),
+        padding: EdgeInsets.all(5),
         splashColor: Colors.white,
         onPressed: () {
           if (title == 'More Difinitions') {
@@ -176,26 +170,22 @@ class _WordScreenState extends State<WordScreen> {
             ),
             onPressed: () {
               if (title == 'Sentences') {
-                Navigator.of(context).pushReplacement(
+                Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) =>
                         SentencesScreen(widget.wordobj, model),
                   ),
                 );
               } else if (title == 'In Videos') {
-                if (widget.model.youglishlimit < 29) {
+                if (widget.model.youglishlimit < 20) {
                   Navigator.of(context).push(
-                    // MaterialPageRoute(
-                    //   builder: (context) => VideoScreen(
-                    //     widget.wordobj['meta']['id'],
-                    //     youtubeList,
-                    //   ),
-                    // ),  actual navigator
                     MaterialPageRoute(
-                      builder: (context) => VideoScreen(
-                          widget.wordobj['meta']['id'], youtubeList, model),
+                      builder: (context) =>
+                          VideoScreen(widget.wordobj, widget.model),
                     ),
                   );
+                } else {
+                  model.setYouglishExpiry();
                 }
               } else if (title == '+ Add to List') {
                 if (!fav) {
@@ -203,7 +193,6 @@ class _WordScreenState extends State<WordScreen> {
                   setState(() {
                     fav = true;
                     model.myWords.add(widget.wordobj);
-                    widget.model.fetchMyWords();
                   });
                   model.addFavWord(widget.wordobj);
                 }

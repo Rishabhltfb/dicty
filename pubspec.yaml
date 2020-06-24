@@ -30,7 +30,6 @@ dependencies:
   scoped_model:
   http: ^0.12.0+3
   shared_preferences: ^0.5.6+1
-  not_paid: ^1.0.0
   firebase_auth: 0.15.4
   google_sign_in:
   youtube_player_flutter: ^6.0.3+2
@@ -38,7 +37,7 @@ dependencies:
   speech_recognition: ^0.3.0+1
   permission_handler: ^3.2.0
   flutter_tindercard: ^0.1.8
-  # firebase_core: 0.4.4
+  firebase_messaging:
 
 dev_dependencies:
   flutter_test:

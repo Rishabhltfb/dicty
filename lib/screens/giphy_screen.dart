@@ -99,31 +99,14 @@ class _GiphyScreenState extends State<GiphyScreen> {
                       _button('In Gifs'),
                       Container(
                         height: viewportHeight * 0.64,
-                        child: GridView.count(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 10,
-                          children: <Widget>[
-                            createGiphy(0),
-                            createGiphy(1),
-                            createGiphy(2),
-                            createGiphy(3),
-                            createGiphy(4),
-                            createGiphy(5),
-                            createGiphy(6),
-                            createGiphy(7),
-                            createGiphy(8),
-                            createGiphy(9),
-                            createGiphy(10),
-                            createGiphy(11),
-                            createGiphy(12),
-                            createGiphy(13),
-                            createGiphy(14),
-                            createGiphy(15),
-                            createGiphy(16),
-                            createGiphy(17),
-                            createGiphy(18),
-                            createGiphy(19),
-                          ],
+                        child: GridView.builder(
+                          itemCount: gifs.length,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2),
+                          itemBuilder: (context, index) {
+                            return createGiphy(index);
+                          },
                         ),
                       ),
                     ],

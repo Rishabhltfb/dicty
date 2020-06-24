@@ -11,6 +11,8 @@ class ConnectedModel extends Model {
   final giphyKey = ApiKeys.giphyKey;
 
   FirebaseUser authenticatedUser = null;
+  var uid = null;
+  var email = null;
   bool isLoading = false;
   bool isUserAuthenticated = false;
   int youglishlimit = 0;
@@ -18,5 +20,6 @@ class ConnectedModel extends Model {
   String nativeLangCode = '';
   List<Map> myWords = [];
   List nativeLanguagesList = [];
+  List<String> realpraticeWords = [];
   // Map<String, dynamic> azureLanguages;
 }

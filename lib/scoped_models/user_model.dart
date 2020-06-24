@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 
+import 'package:dictyapp/helpers/practice.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,6 +37,10 @@ class UserModel extends ConnectedModel {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
 
       prefs.setString('token', token);
+      prefs.setString('uid', authenticatedUser.uid);
+      prefs.setString('email', authenticatedUser.email);
+      uid = authenticatedUser.uid;
+      email = authenticatedUser.email;
       return true;
     } else {
       return false;
@@ -43,9 +48,31 @@ class UserModel extends ConnectedModel {
   }
 
   Future<bool> autoAuthenticate() async {
+    print('Inside auto-authenticate');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    print('shared prefs loaded');
     String token = prefs.getString('token');
+
     if (token != null) {
+      String tempuid = prefs.getString('uid');
+      String tempemail = prefs.getString('email');
+      String limit = prefs.getString('limit');
+      String expiry = prefs.getString('expiryTime');
+      if (limit != null) {
+        youglishlimit = int.parse(limit);
+      }
+      final DateTime now = DateTime.now();
+      if (expiry != null && youglishlimit > 19) {
+        DateTime expiryTime = DateTime.parse(expiry);
+        if (expiryTime.isBefore(now)) {
+          youglishlimit = 0;
+          prefs.setString('limit', youglishlimit.toString());
+        } else {
+          youglishlimit = int.parse(limit);
+        }
+      }
+      uid = tempuid;
+      email = tempemail;
       return true;
     } else {
       return false;
@@ -56,9 +83,19 @@ class UserModel extends ConnectedModel {
     googleSignIn.signOut();
     authenticatedUser = null;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-    await prefs.remove('native');
-    await prefs.remove('nativeCode');
+    prefs.clear();
+    // await prefs.remove('token');
+    // await prefs.remove('uid');
+    // await prefs.remove('email');
+    // await prefs.remove('native');
+    // await prefs.remove('nativeCode');
+    uid = null;
+    myWords = [];
+
+    authenticatedUser = null;
+    email = null;
+    nativeLang = '';
+    nativeLangCode = '';
     print('user sign out');
   }
 
@@ -89,7 +126,7 @@ class UserModel extends ConnectedModel {
 
     try {
       final http.Response response = await http.post(
-          'https://dicty-app.firebaseio.com/${authenticatedUser.uid}/words.json',
+          'https://dicty-app.firebaseio.com/${uid}/words.json',
           body: json.encode(addedWord));
 
       if (response.statusCode != 200 || response.statusCode != 201) {
@@ -119,9 +156,9 @@ class UserModel extends ConnectedModel {
   Future<Null> fetchMyWords() async {
     isLoading = true;
     notifyListeners();
+    realpraticeWords = practiceOptions;
     return await http
-        .get(
-            'https://dicty-app.firebaseio.com/${authenticatedUser.uid}/words.json')
+        .get('https://dicty-app.firebaseio.com/${uid}/words.json')
         .then<Null>((http.Response response) {
       if (response.statusCode == 200) {
         final List<Map> fetchedWordList = [];
@@ -138,6 +175,11 @@ class UserModel extends ConnectedModel {
           // print(entry);
         });
         myWords = fetchedWordList;
+        List<String> temp = [];
+        fetchedWordList.forEach((wordobj) {
+          temp.add(wordobj['meta']['id']);
+        });
+        realpraticeWords = practiceOptions + temp;
       } else {
         print(
             "Fetch Words Error: ${json.decode(response.body)["error"].toString()}");

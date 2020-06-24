@@ -69,7 +69,7 @@ class LangService extends ConnectedModel {
         // });
         return translations;
       } else {
-        print('Invalid status code : ${response.statusCode}');
+        print('Invalid status code: ${response.statusCode}');
         return [];
       }
     } catch (err) {

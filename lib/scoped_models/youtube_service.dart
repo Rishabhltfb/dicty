@@ -13,10 +13,13 @@ class YoutubeService extends ConnectedModel {
       final http.Response response = await http.get(
           'https://youglish.com/api/v1/videos/search?key=${key}&query=${word}&lg=english&accent=us',
           headers: <String, String>{'Content-Type': 'application/json'});
+      youglishlimit++;
 
       if (response.statusCode == 200) {
         print('Youglish search success.');
         final res = json.decode(response.body);
+        // print('Youglish list is : ${res['results']}');
+        // setYouglishLimit();
         return res['results'];
       } else {
         print('Invalid status code : ${response.statusCode}');
@@ -28,20 +31,12 @@ class YoutubeService extends ConnectedModel {
     }
   }
 
-  void setYouglishLimit() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String limit = prefs.getString('limit');
-    String expiryTime = prefs.getString('expiryTime');
-
+  void setYouglishExpiry() async {
     final DateTime now = DateTime.now();
-    if (expiryTime.isNotEmpty) {
-      final parsedExpiryTime = DateTime.parse(expiryTime);
-      if (parsedExpiryTime.isBefore(now)) {}
-    } else {
-      final DateTime expiryTime = now.add(Duration(days: 1));
-      prefs.setString('expiryTime', expiryTime.toIso8601String());
-    }
-    youglishlimit = int.parse(limit);
+    final DateTime expiryTime = now.add(Duration(days: 1));
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('limit', youglishlimit.toString());
+    prefs.setString('expiryTime', expiryTime.toIso8601String());
   }
 
   // void resetExpiry() async {

@@ -20,7 +20,9 @@ class _LearnLangScreenState extends State<LearnLangScreen> {
       onPressed: () {},
       child: Text(
         '🇺🇸   English',
-        style: TextStyle(color: Theme.of(context).primaryColor),
+        style: TextStyle(
+            color: Theme.of(context).primaryColor,
+            fontSize: viewportHeight * 0.025),
       ),
     );
   }
@@ -77,7 +79,7 @@ class _LearnLangScreenState extends State<LearnLangScreen> {
                 width: viewportWidth * 0.5,
                 child: _learnlangButton(),
               ),
-              SizedBox(height: viewportHeight * 0.35),
+              SizedBox(height: viewportHeight * 0.3),
               Container(
                 width: viewportWidth * 0.5,
                 child: _continueButton(),

@@ -30,14 +30,18 @@ class _LangSelectScreenState extends State<LangSelectScreen> {
       ),
       onPressed: () {},
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Text(
             flag,
             textScaleFactor: 1.5,
           ),
+          SizedBox(
+            width: 10,
+          ),
           Container(
-            width: viewportWidth * 0.3,
+            width: viewportWidth * 0.32,
             height: viewportHeight * 0.06,
             child: new DropdownButton<String>(
               iconEnabledColor: Theme.of(context).primaryColor,
@@ -133,11 +137,8 @@ class _LangSelectScreenState extends State<LangSelectScreen> {
                       ),
                     ),
                   ),
-                  Container(
-                    width: viewportWidth * 0.5,
-                    child: _dropdown(model),
-                  ),
-                  SizedBox(height: viewportHeight * 0.35),
+                  _dropdown(model),
+                  SizedBox(height: viewportHeight * 0.3),
                   Container(
                     width: viewportWidth * 0.5,
                     child: _continueButton(model),

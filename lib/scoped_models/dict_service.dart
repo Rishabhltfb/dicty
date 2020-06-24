@@ -56,4 +56,11 @@ class DictService extends ConnectedModel {
     }
     return _newString;
   }
+
+  List practiceSen(String sentence, String word) {
+    List list;
+    list = sentence.split(word.toLowerCase());
+    // print(list);
+    return list;
+  }
 }
