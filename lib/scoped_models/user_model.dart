@@ -153,20 +153,23 @@ class UserModel extends ConnectedModel {
     }
   }
 
-  Future<Null> fetchMyWords() async {
+  Future<bool> fetchMyWords() async {
     isLoading = true;
     notifyListeners();
     realpraticeWords = practiceOptions;
     return await http
         .get('https://dicty-app.firebaseio.com/${uid}/words.json')
-        .then<Null>((http.Response response) {
+        .then<bool>((http.Response response) {
       if (response.statusCode == 200) {
+        print('inside fetch success');
         final List<Map> fetchedWordList = [];
         final Map<String, dynamic> wordListData = json.decode(response.body);
         if (wordListData == null) {
+          print('No list element');
+          myWords = [];
           isLoading = false;
           notifyListeners();
-          return;
+          return true;
         }
 
         wordListData.forEach((String id, dynamic entryData) {
@@ -183,14 +186,16 @@ class UserModel extends ConnectedModel {
       } else {
         print(
             "Fetch Words Error: ${json.decode(response.body)["error"].toString()}");
+        return false;
       }
       isLoading = false;
       notifyListeners();
+      return true;
     }).catchError((error) {
       print("Fetch Word Error: ${error.toString()}");
       isLoading = false;
       notifyListeners();
-      return;
+      return false;
     });
   }
 }

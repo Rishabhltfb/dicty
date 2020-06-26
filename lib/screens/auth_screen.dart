@@ -87,7 +87,8 @@ class _AuthScreenState extends State<AuthScreen> {
           children: <Widget>[
             Image(image: AssetImage('assets/images/google.jpeg'), height: 20.0),
             Padding(
-              padding: const EdgeInsets.only(left: 10.0),
+              padding: const EdgeInsets.only(
+                  left: 10.0, top: 10, bottom: 10, right: 5),
               child: Text(
                 'Sign In with Google',
                 style: TextStyle(

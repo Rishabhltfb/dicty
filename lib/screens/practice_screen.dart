@@ -39,9 +39,11 @@ class _PracticeScreenState extends State<PracticeScreen>
     'still',
     'loading',
   ];
+  List<String> mywords = [];
   var wordObj;
-  List defs = ['Sentences are loading yet'];
-  List sentences = ['Sentences are loading yet'];
+  List mywordobjs = [];
+  List defs = ['No Definitions found yet'];
+  List sentences = ['No Sentences found yet'];
   int currIndex = 0;
 
   @override
@@ -49,7 +51,6 @@ class _PracticeScreenState extends State<PracticeScreen>
     super.initState();
     showTrans = false;
     setOptions();
-
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 1),
@@ -68,7 +69,32 @@ class _PracticeScreenState extends State<PracticeScreen>
       // print(list);
       wordObj = list[0];
       if (wordObj is String) {
-        print('It is a string man');
+        print('It is a string man $wordObj ');
+        widget.model.searchWordDict(wordObj).then((list) {
+          // print(list);
+          wordObj = list[0];
+          if (wordObj is String) {
+            print('It is a string man $wordObj ');
+          } else {
+            defs = wordObj['shortdef'];
+            sentences = [];
+            if (wordObj['def'][0]['sseq'][0][0][1]['dt'] != null) {
+              if (wordObj['def'][0]['sseq'][0][0][1]['dt'][1][1] is String) {
+                wordObj['def'][0]['sseq'][0][0][1]['dt'][2][1].forEach((obj) {
+                  sentences.add(widget.model.parseSentence(obj['t']));
+                });
+              } else {
+                wordObj['def'][0]['sseq'][0][0][1]['dt'][1][1].forEach((obj) {
+                  sentences.add(widget.model.parseSentence(obj['t']));
+                });
+              }
+            } else {
+              wordObj['def'][0]['sseq'][0][1][1]['dt'][1][1].forEach((obj) {
+                sentences.add(widget.model.parseSentence(obj['t']));
+              });
+            }
+          }
+        });
       } else {
         defs = wordObj['shortdef'];
         sentences = [];
@@ -101,6 +127,8 @@ class _PracticeScreenState extends State<PracticeScreen>
       _isLoading = true;
     });
     List list = [];
+
+    mywordobjs = widget.model.myWords;
     int option1 = new Random().nextInt(widget.model.realpraticeWords.length);
     int option2 = new Random().nextInt(widget.model.realpraticeWords.length);
     int option3 = new Random().nextInt(widget.model.realpraticeWords.length);
@@ -110,7 +138,8 @@ class _PracticeScreenState extends State<PracticeScreen>
     list.add(widget.model.realpraticeWords[option2]);
     list.add(widget.model.realpraticeWords[option3]);
     list.add(widget.model.realpraticeWords[option4]);
-    practiceWord = list[correctoption];
+    practiceWord = mywordobjs[currIndex]['meta']['id'];
+    list[correctoption] = practiceWord;
     widget.model.translateIBM(list).then((newlist) {
       options = [];
       newlist.forEach((element) {
@@ -148,7 +177,7 @@ class _PracticeScreenState extends State<PracticeScreen>
                 height: viewportHeight * 0.6,
                 child: TinderSwapCard(
                   orientation: AmassOrientation.TOP,
-                  totalNum: 50,
+                  totalNum: 500,
                   stackNum: 2,
                   maxHeight: viewportHeight * 0.65,
                   maxWidth: viewportWidth * 0.85,
@@ -157,12 +186,12 @@ class _PracticeScreenState extends State<PracticeScreen>
                   swipeCompleteCallback: (orientation, index) {
                     if (index + 1 > currIndex) {
                       setState(() {
-                        setOptions();
                         print(index + 1);
                         print(currIndex);
                         ansRevealed = false;
                         sentenceRevealed = false;
-                        currIndex = index + 1;
+                        currIndex = (index + 1) % (mywordobjs.length);
+                        setOptions();
                       });
                     }
                   },
@@ -255,7 +284,7 @@ class _PracticeScreenState extends State<PracticeScreen>
                 setState(() {
                   correctAns = true;
                   ansRevealed = true;
-                  showTrans = !showTrans;
+                  showTrans = true;
 
                   if (_animationStatus == AnimationStatus.dismissed) {
                     _animationController.forward();
@@ -268,13 +297,13 @@ class _PracticeScreenState extends State<PracticeScreen>
                     hintNeeded = false;
                     correctAns = false;
                     ansRevealed = true;
-                    showTrans = !showTrans;
+                    // showTrans = !showTrans;
 
-                    if (_animationStatus == AnimationStatus.dismissed) {
-                      _animationController.forward();
-                    } else {
-                      _animationController.reverse();
-                    }
+                    // if (_animationStatus == AnimationStatus.dismissed) {
+                    //   _animationController.forward();
+                    // } else {
+                    //   _animationController.reverse();
+                    // }
                   });
                 });
               }
@@ -391,14 +420,26 @@ class _PracticeScreenState extends State<PracticeScreen>
               icon: Icon(
                 MyFlutterApp.volume,
                 size: viewportHeight * 0.052,
-                color: !showDef && !showSen
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).primaryColor.withOpacity(0.6),
+                color: Theme.of(context).primaryColor,
               ),
               onPressed: () {
                 if (!showDef && !showSen) {
                   widget.model.initializeTts();
                   widget.model.ttsspeak(practiceWord).then((_) {
+                    // model.flutterTts.stop();
+                  });
+                } else if (showDef) {
+                  widget.model.initializeTts();
+                  String temp = '';
+                  defs.forEach((element) {
+                    temp = temp + element;
+                  });
+                  widget.model.ttsspeak(temp).then((_) {
+                    // model.flutterTts.stop();
+                  });
+                } else {
+                  widget.model.initializeTts();
+                  widget.model.ttsspeak(sentences[0]).then((_) {
                     // model.flutterTts.stop();
                   });
                 }

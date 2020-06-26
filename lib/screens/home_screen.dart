@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dictyapp/helpers/dimensions.dart';
 import 'package:dictyapp/helpers/my_flutter_app_icons.dart';
 import 'package:dictyapp/scoped_models/main_scoped_model.dart';
+import 'package:dictyapp/screens/practice_screen.dart';
 import 'package:dictyapp/screens/word_screen.dart';
 import 'package:dictyapp/widgets/dictyHead.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,7 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   var viewportHeight;
   var viewportWidth;
   var searchWord = '';
@@ -40,6 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String transcription = '';
   TextEditingController _textEditingController = TextEditingController();
+
+  ScrollController _scrollController = new ScrollController();
 
   @override
   void initState() {
@@ -147,6 +150,11 @@ class _HomeScreenState extends State<HomeScreen> {
           onChanged: (String value) {
             if (value.isNotEmpty) {
               widget.model.searchWordDict(value).then((list) {
+                _scrollController.animateTo(
+                  viewportHeight * 0.22,
+                  curve: Curves.easeOut,
+                  duration: const Duration(milliseconds: 600),
+                );
                 if (list != null && typing) {
                   setState(() {
                     dict_words = list;
@@ -343,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
   }
 
-  Widget _button(String title) {
+  Widget _button(String title, {BuildContext passedcontext, MainModel model}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: GestureDetector(
@@ -355,6 +363,13 @@ class _HomeScreenState extends State<HomeScreen> {
         onLongPressEnd: (details) {
           Timer(Duration(seconds: 1), () {
             stop();
+          });
+          Timer(Duration(seconds: 2), () {
+            _scrollController.animateTo(
+              viewportHeight * 0.22,
+              curve: Curves.easeOut,
+              duration: const Duration(milliseconds: 600),
+            );
           });
         },
         child: Container(
@@ -386,34 +401,57 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (title == 'My Words') {
                   currTransindex = -1;
                   widget.model.fetchMyWords().then((value) {
+                    print('Stage 1');
                     mywordObjs = widget.model.myWords;
                     List<String> mywordsList = [];
                     List<String> mywordsTransList = [];
-                    mywordObjs.forEach((wordObj) {
-                      mywordsList.add(wordObj['meta']['id']);
-                    });
+                    if (mywordObjs.isNotEmpty) {
+                      mywordObjs.forEach((wordObj) {
+                        mywordsList.add(wordObj['meta']['id']);
+                      });
+                    }
                     if (mywordsList.isNotEmpty) {
                       widget.model.translateIBM(mywordsList).then((list) {
+                        print('Stage 2');
                         list.forEach((element) {
                           mywordsTransList.add(element['translation']);
                         });
+                        Timer(Duration(milliseconds: 10), () {
+                          setState(() {
+                            mywordsTrans = mywordsTransList;
+                            mywords = mywordsList;
+                            _mywordsLoading = !value;
+                          });
+                        });
                       });
-                    }
-                    Timer(Duration(seconds: 1), () {
+                    } else {
                       setState(() {
-                        mywordsTrans = mywordsTransList;
-                        mywords = mywordsList;
                         _mywordsLoading = false;
                       });
-                    });
+                    }
                   });
                   setState(() {
                     _mywordsLoading = true;
                     hideButtons = true;
                     showMyWords = true;
                   });
-                } else if (title == 'Practice' && mywords.isNotEmpty) {
-                  Navigator.of(context).pushNamed('/practice');
+                } else if (title == 'Practice') {
+                  if (widget.model.myWords.isNotEmpty) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => PracticeScreen(model),
+                      ),
+                    );
+                  } else {
+                    Scaffold.of(passedcontext).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[Text('No Words to practice!')],
+                        ),
+                      ),
+                    );
+                  }
                 }
               }),
         ),
@@ -445,6 +483,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ScopedModelDescendant<MainModel>(
                   builder: (context, child, model) {
                     return SingleChildScrollView(
+                      controller: _scrollController,
                       child: Column(
                         children: <Widget>[
                           navbarButton(),
@@ -466,7 +505,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? myWordsList(context, model)
                               : Container(),
                           hideButtons ? Container() : _button('My Words'),
-                          hideButtons ? Container() : _button('Practice'),
+                          hideButtons
+                              ? Container()
+                              : _button('Practice',
+                                  passedcontext: context, model: model),
                         ],
                       ),
                     );
