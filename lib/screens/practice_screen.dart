@@ -30,6 +30,7 @@ class _PracticeScreenState extends State<PracticeScreen>
   bool showSen = false;
   bool sentenceRevealed = false;
   bool _isLoading = false;
+  bool defShowWord = false;
   AnimationController _animationController;
   Animation<double> _animation;
   AnimationStatus _animationStatus = AnimationStatus.dismissed;
@@ -454,48 +455,70 @@ class _PracticeScreenState extends State<PracticeScreen>
   Widget midBox({String currWord, String title}) {
     if (title != null) {
       if (title == 'Def') {
-        return Container(
-          height: viewportHeight * 0.4,
-          child: _isLoading
-              ? Center(
-                  child: CircularProgressIndicator(
-                    backgroundColor: Theme.of(context).primaryColor,
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              defShowWord = !defShowWord;
+            });
+          },
+          child: defShowWord
+              ? Container(
+                  height: viewportHeight * 0.4,
+                  color: Colors.white,
+                  child: Center(
+                    child: Text(
+                      practiceWord,
+                      style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontFamily: 'Krungthep',
+                          fontSize: viewportHeight * 0.045),
+                    ),
                   ),
                 )
-              : ListView.builder(
-                  itemCount: defs.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(
-                        '${index + 1} : ' + defs[index],
-                        style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: viewportHeight * 0.03),
-                      ),
-                    );
-                  },
+              : Container(
+                  height: viewportHeight * 0.4,
+                  child: _isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            backgroundColor: Theme.of(context).primaryColor,
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: defs.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(
+                                '${index + 1} : ' + defs[index],
+                                style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontSize: viewportHeight * 0.03),
+                              ),
+                            );
+                          },
+                        ),
                 ),
         );
       } else {
         List list = widget.model.practiceSen(sentences[0], practiceWord);
-        return Container(
-          height: viewportHeight * 0.4,
-          child: _isLoading
-              ? Center(
-                  child: CircularProgressIndicator(
-                    backgroundColor: Theme.of(context).primaryColor,
-                  ),
-                )
-              : Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 10),
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          sentenceRevealed = true;
-                        });
-                      },
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              sentenceRevealed = true;
+            });
+          },
+          child: Container(
+            height: viewportHeight * 0.4,
+            color: Colors.white,
+            child: _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(
+                      backgroundColor: Theme.of(context).primaryColor,
+                    ),
+                  )
+                : Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 10),
                       child: RichText(
                         text: TextSpan(
                           style: TextStyle(
@@ -525,7 +548,7 @@ class _PracticeScreenState extends State<PracticeScreen>
                       ),
                     ),
                   ),
-                ),
+          ),
         );
       }
     } else {

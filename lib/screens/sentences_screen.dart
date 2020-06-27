@@ -255,15 +255,6 @@ class _SentencesScreenState extends State<SentencesScreen> {
                     ),
                     children: <TextSpan>[
                       TextSpan(text: definitions[index]),
-                      title != 'Sentences'
-                          ? TextSpan(
-                              text: '. (Noun)',
-                              style: TextStyle(
-                                  fontSize: viewportHeight * 0.018,
-                                  fontStyle: FontStyle.italic,
-                                  fontWeight: FontWeight.bold),
-                            )
-                          : TextSpan(text: '.'),
                     ],
                   ),
                 ),

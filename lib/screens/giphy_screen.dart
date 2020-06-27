@@ -313,15 +313,6 @@ class _GiphyScreenState extends State<GiphyScreen> {
                     ),
                     children: <TextSpan>[
                       TextSpan(text: definitions[index]),
-                      title != 'Sentences'
-                          ? TextSpan(
-                              text: '. (Noun)',
-                              style: TextStyle(
-                                  fontSize: viewportHeight * 0.018,
-                                  fontStyle: FontStyle.italic,
-                                  fontWeight: FontWeight.bold),
-                            )
-                          : TextSpan(text: '.'),
                     ],
                   ),
                 ),

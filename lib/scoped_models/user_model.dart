@@ -130,6 +130,8 @@ class UserModel extends ConnectedModel {
           body: json.encode(addedWord));
 
       if (response.statusCode != 200 || response.statusCode != 201) {
+        wordids.add(json.decode(response.body)['name']);
+        print(json.decode(response.body));
         return true;
       } else {
         return false;
@@ -163,6 +165,7 @@ class UserModel extends ConnectedModel {
       if (response.statusCode == 200) {
         print('inside fetch success');
         final List<Map> fetchedWordList = [];
+        final List tempWordids = [];
         final Map<String, dynamic> wordListData = json.decode(response.body);
         if (wordListData == null) {
           print('No list element');
@@ -175,14 +178,17 @@ class UserModel extends ConnectedModel {
         wordListData.forEach((String id, dynamic entryData) {
           final Map entry = entryData['wordobj'];
           fetchedWordList.add(entry);
-          // print(entry);
+          tempWordids.add(id);
         });
         myWords = fetchedWordList;
+        wordids = tempWordids;
         List<String> temp = [];
         fetchedWordList.forEach((wordobj) {
           temp.add(wordobj['meta']['id']);
         });
         realpraticeWords = practiceOptions + temp;
+
+        notifyListeners();
       } else {
         print(
             "Fetch Words Error: ${json.decode(response.body)["error"].toString()}");
@@ -193,6 +199,29 @@ class UserModel extends ConnectedModel {
       return true;
     }).catchError((error) {
       print("Fetch Word Error: ${error.toString()}");
+      isLoading = false;
+      notifyListeners();
+      return false;
+    });
+  }
+
+  Future<bool> deleteWord(String wordId) async {
+    isLoading = true;
+    notifyListeners();
+    return await http
+        .delete('https://dicty-app.firebaseio.com/${uid}/words/${wordId}.json')
+        .then<bool>((http.Response response) {
+      if (response.statusCode == 200) {
+        print('Word successfully deleted');
+        print(response);
+        return true;
+      } else {
+        print(
+            "Delete Words Error: ${json.decode(response.body)["error"].toString()}");
+        return false;
+      }
+    }).catchError((error) {
+      print("Delete Word Error: ${error.toString()}");
       isLoading = false;
       notifyListeners();
       return false;

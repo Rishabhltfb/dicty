@@ -150,11 +150,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           onChanged: (String value) {
             if (value.isNotEmpty) {
               widget.model.searchWordDict(value).then((list) {
-                _scrollController.animateTo(
-                  viewportHeight * 0.22,
-                  curve: Curves.easeOut,
-                  duration: const Duration(milliseconds: 600),
-                );
                 if (list != null && typing) {
                   setState(() {
                     dict_words = list;
@@ -186,6 +181,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             searchWord = value;
           },
           onTap: () {
+            _scrollController.animateTo(
+              viewportHeight * 0.22,
+              curve: Curves.easeOut,
+              duration: const Duration(milliseconds: 600),
+            );
             setState(() {
               hideButtons = true;
               typing = true;
@@ -200,11 +200,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           decoration: InputDecoration(
             alignLabelWithHint: false,
-            prefixIcon: Icon(
-              Icons.search,
-              color: Theme.of(context).accentColor,
-              size: getViewportHeight(context) * 0.025,
-            ),
+            prefixIcon: IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.search,
+                  color: Theme.of(context).accentColor,
+                  size: getViewportHeight(context) * 0.025,
+                )),
             labelText: 'Search Word',
             labelStyle: TextStyle(
               fontFamily: "Krungthep",

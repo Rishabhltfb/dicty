@@ -21,5 +21,6 @@ class ConnectedModel extends Model {
   List<Map> myWords = [];
   List nativeLanguagesList = [];
   List<String> realpraticeWords = [];
+  List wordids = [];
   // Map<String, dynamic> azureLanguages;
 }

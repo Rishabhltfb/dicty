@@ -195,6 +195,29 @@ class _WordScreenState extends State<WordScreen> {
                     model.myWords.add(widget.wordobj);
                   });
                   model.addFavWord(widget.wordobj);
+                } else {
+                  int index = model.myWords.indexWhere((wordObject) {
+                    return wordObject['meta']['id'] ==
+                        widget.wordobj['meta']['id'];
+                  });
+                  print('!!!!!!!!!!!!--- ${index}----');
+                  print('${model.wordids.length}');
+                  String wordId = model.wordids[index];
+                  print('!!!!!!!!!!!!--- ${index}----${wordId}');
+
+                  model.deleteWord(wordId).then((value) {
+                    if (value) {
+                      setState(() {
+                        fav = false;
+                        model.myWords.removeWhere((wordObject) =>
+                            wordObject['meta']['id'] ==
+                            widget.wordobj['meta']['id']);
+                        print('!!!!!! success ${model.myWords.length}');
+                      });
+                    } else {
+                      print('Deleting failed screen error');
+                    }
+                  });
                 }
               } else if (title == 'In Gifs') {
                 Navigator.of(context).push(
@@ -266,13 +289,6 @@ class _WordScreenState extends State<WordScreen> {
                     ),
                     children: <TextSpan>[
                       TextSpan(text: definitions[index]),
-                      TextSpan(
-                        text: '. (Noun)',
-                        style: TextStyle(
-                            fontSize: viewportHeight * 0.018,
-                            fontStyle: FontStyle.italic,
-                            fontWeight: FontWeight.bold),
-                      ),
                     ],
                   ),
                 ),
